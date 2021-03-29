@@ -52,3 +52,19 @@ Colour Sensor interfacing: https://drive.google.com/drive/folders/1TPrljaSlRFnT5
 	All the odd numbered pins are in lower row and all the even numbered pins are in the upper row. These pins are arranged in a SNAKE
 pattern as shown by the red mark.
 
+//------------------------------------------------------------------------------------
+
+## IoT Dashboard
+
+	Note: BLE code for Web App to be referred from MockRPC directory
+
+	References:
+
+		[1] IoT Dashboard 		   - https://github.com/electrocoder/iotdashboard
+		[2] Timer 		  		   - https://codepen.io/geoffgraham/pen/yLywVbW
+		[3] Json Display  		   - https://stackoverflow.com/questions/4810841/pretty-print-json-using-javascript
+		[4] Loader 		  		   - https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_loader5
+		[5] Server initiated data  - https://stackoverflow.com/questions/56913676/dynamic-updates-in-real-time-to-a-django-template
+
+
+//------------------------------------------------------------------------------------

@@ -1,6 +1,17 @@
-MIT License
 
-Copyright (c) 2021 Akshay Pampatwar, Rahul Paknikar, Sachin Patil
+Iotdashboard project
+Django 3.1
+Python 3.8
+
+Author: Sahin MERSIN
+
+Demo: http://iotdashboard.pythonanywhere.com
+Source: https://github.com/electrocoder/iotdashboard
+
+https://iothook.com/
+http://mesebilisim.com
+
+The MIT License (MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

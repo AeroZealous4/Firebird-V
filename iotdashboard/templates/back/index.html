@@ -1,0 +1,22 @@
+{% extends "back/base.html" %}
+
+{% load static %}
+{% load custom_tags %}
+
+
+{% block title %}{% website_name %}{% endblock %}
+
+{% block website_name %}Arena{% endblock %}
+
+{% block content %}
+
+    <div style="position: relative; top: 0; left: 0">
+        <img src="{% static "back/dashboard/img/arena.png" %}" style="position: relative; width: 100%; height: 480px">
+        <img src="{% static "back/dashboard/img/robot.png" %}" style="position: absolute; z-index: 1; top: 87.3%; left: 40.5%; width: 5%; height: 10%">
+    </div>
+
+{% endblock %}
+
+<script type="text/javascript">
+    
+</script>
