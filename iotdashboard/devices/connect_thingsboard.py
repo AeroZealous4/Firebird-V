@@ -4,7 +4,7 @@ from django.conf import settings
 import paho.mqtt.client as mqtt
 from . import connect_robot
 import channels.layers
-import threading
+# import threading
 import asyncio
 import time
 import json
@@ -16,7 +16,7 @@ ACCESS_TOKEN = 'pxvRs3iucxEGEU0R4ik5'
 DEVICE_ID = 'a9e821a0-8caf-11eb-950e-efef5c07c810'
 subscribe_topic = 'v1/devices/me/rpc/request/+'
 coapc = None
-ble_thread = None
+ble_client = None
 record_copy = dict()
 
 
@@ -60,7 +60,7 @@ def send_request(request):
 
     esp_req_data = None
 
-    if request["method"] == "fetchNearest":
+    if request["method"] == "fetchNearest" and request["params"]["completeIn"] < 256:
         esp_req_data = "fetch-"
         if "major" in request["params"]["type"]:
             esp_req_data += "major-"
@@ -69,10 +69,10 @@ def send_request(request):
 
         esp_req_data += str(request["params"]["completeIn"])
 
-    elif request["method"] == "scan":
-        esp_req_data = request["method"] + '-'
-        + str(request["params"]["plot"]) + '-'
-        + str(request["params"]["completeIn"])
+    elif request["method"] == "scan" and request["params"]["completeIn"] < 256:
+        esp_req_data = request["method"] + '-' + \
+        str(request["params"]["plot"]) + '-' + \
+        str(request["params"]["completeIn"])
 
     else:
         esp_req_data = "no-request"
@@ -80,7 +80,7 @@ def send_request(request):
     # loop = asyncio.get_event_loop()
     # loop = asyncio.new_event_loop()
     # asyncio.set_event_loop(loop)
-    connect_robot.loop.run_until_complete(connect_robot.forward_request(esp_req_data.encode('utf-8')))
+    ble_client.loop.run_until_complete(ble_client.forward_request(esp_req_data.encode('utf-8')))
 
 
 def fetch_response(request_id, method_type):
@@ -91,12 +91,13 @@ def fetch_response(request_id, method_type):
     # asyncio.set_event_loop(loop)
 
     robot_response = {"id": request_id}
-    esp_response = connect_robot.loop.run_until_complete(connect_robot.get_response())
+    esp_response = ble_client.loop.run_until_complete(ble_client.get_response())
     esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
     if "accepted" == esp_response:
         broadcast_ticks({'accept': method_type})
-        esp_response = connect_robot.loop.run_until_complete(connect_robot.get_response())
+        esp_response = ble_client.loop.run_until_complete(ble_client.get_response())
+        esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
     if "major" in esp_response:
         robot_response["type"] = "majorInjury"
@@ -151,10 +152,15 @@ def setup_coap():
 
 
 def setup_ble():
-    global ble_thread
+    global ble_client
+    ble_client = connect_robot.ESP32_BLE()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(ble_client.connect_firebird())
+
     # ble_thread = threading.Thread(target=connect_robot.connect_firebird)
     # ble_thread.start()
-    connect_robot.connect_firebird()
+    # connect_robot.connect_firebird()
 
 
 def connect_server(mqttc):

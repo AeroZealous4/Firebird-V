@@ -308,11 +308,12 @@
         if ("request" in data)
         {
 	        if (data['request']['method'] == "fetchNearest" || data['request']['method'] == "scan")
-	        {
 	        	output('action', 'Forwarding Request to Robot...');
-	        	document.getElementById('actionID').style.display = "block";
-		    	document.getElementById('responseID').style.display = "none";
-	        }
+	        else
+	        	output('action', 'Request considered as idle.\nNotifying to Robot...');
+
+	        document.getElementById('actionID').style.display = "block";
+		    document.getElementById('responseID').style.display = "none";
 
 	        request = JSON.stringify(data["request"], undefined, 4);
 	        console.log('request', request);
@@ -326,15 +327,15 @@
 	    	document.getElementById('actionID').style.display = "none";
 		    document.getElementById('responseID').style.display = "block";
 	    }
-	    else if ("accepted" in data)
+	    else if ("accept" in data)
 	    {
 	    	accept = JSON.stringify(data["accept"], undefined, 4);
-	        console.log('response', accept);
+	        console.log('accept', accept);
 	    	output('responseID', 'Request Accepted.\nPerforming Request...');
 	        document.getElementById('actionID').style.display = "none";
 		    document.getElementById('responseID').style.display = "block";
 
-		    pausecomp(2500);
+		    pausecomp(3000);
 
 		    if ("fetch" in data['accept'])
 			    output('action', 'Fetching Nearest...');
