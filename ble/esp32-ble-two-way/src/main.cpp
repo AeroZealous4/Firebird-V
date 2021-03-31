@@ -25,7 +25,7 @@
 #define TXD2 17
 char str_msg[] = "ESP string: Info will be appended on this string";
 unsigned long int Sec = 0 ;
-
+unsigned long int CompleteIn = 0 ; //Task to be completed in this many Secs
 unsigned char led_toggle = 0;
 
 BLECharacteristic *ledCharacteristic;
@@ -57,71 +57,99 @@ class ControlSwitch: public BLECharacteristicCallbacks {
       strcpy(str_msg,value.c_str());
       char *token = strtok(str_msg,"-");
       
+      char *ptr;
       // char *cmd;
       char cmd_1[] = "scan";
-      char cmd_2[] = "fetchNearest";
-      char cmd_1_1[] = "majorInjury";
-      char cmd_1_2[] = "minorInjury";
+      char cmd_2[] = "fetch";
+      char cmd_1_1[] = "major";
+      char cmd_1_2[] = "minor";
 
       // cmd = token;
       int res1 =  strcmp(token,cmd_1);
       int res2 =  strcmp(token,cmd_2);
 
       Serial.printf("'%s'\n",token);
-      if(res1 == 0)
+      if(res1 == 0) 
       {
-        Serial.printf("scan ");
-        token = strtok(NULL,"-");
-        char *ptr;
-        long switchState1 = std::strtol(token, &ptr, 10);
-        Serial.printf("%ld\n",switchState1); 
-        Serial.printf("'%s'\n",token);     
-
-        if(switchState1 < 1 || switchState1 > 16) 
+        // Serial.printf("scan ");
+        if(token!=NULL)
         {
-          Serial.printf("Invalid Plot number");
-          buttonCharacteristic->setValue("Invalid_Plot_number");
-          buttonCharacteristic->notify();
-        }
-        else
+          token = strtok(NULL,"-");
+          
+          long switchState1 = std::strtol(token, &ptr, 10);
+          Serial.printf("Scan plot: %ld\n",switchState1); 
+          // Serial.printf("'%s'\n",token);     
+
+          if(switchState1 < 1 || switchState1 > 16) 
           {
-            sprintf(str_msg,"S%c",(unsigned char) switchState1);
-            Serial2.write(str_msg);
-            Sec = millis()/1000;
+            Serial.printf("Invalid Plot number");
+            buttonCharacteristic->setValue("Invalid_Plot_number");
+            buttonCharacteristic->notify();
           }
+          else
+            {
+              //Completion time
+              // Serial.printf("scan ");
+              if(token!=NULL)
+              {
+                token = strtok(NULL,"-");
+                CompleteIn = std::strtol(token, &ptr, 10);
+                Serial.printf("Complete in:%ld\n",CompleteIn); 
+                // Serial.printf("'%s'\n",token); 
+               
+                sprintf(str_msg,"S%c%c",(unsigned char) switchState1,(unsigned char)  CompleteIn);
+                Serial2.write(str_msg);
+                // Sec = millis()/1000;
+              }
+            }
+        }
+ 
       }
       else 
         if(res2 == 0)
         {
           Serial.printf("fetchNearest ");
-          token = strtok(NULL,"-");
-          
-          res1 =  strcmp(token,cmd_1_1);
-          res2 =  strcmp(token,cmd_1_2);
 
-          if(res1 == 0)
+          if(token!=NULL)
+          {
+            token = strtok(NULL,"-");
+            
+            res1 =  strcmp(token,cmd_1_1);
+            res2 =  strcmp(token,cmd_1_2);
+
+              //Completion time
+              // Serial.printf("scan ");
+            if(token!=NULL)
             {
-              Serial.printf("majorInjury\n");
-              sprintf(str_msg,"FM");
-              Serial2.write(str_msg);
-              // Serial2.write('1');
-              Sec = millis()/1000;
+              token = strtok(NULL,"-");
+              CompleteIn = std::strtol(token, &ptr, 10);
+              Serial.printf("Complete in:%ld\n",CompleteIn); 
+              // Serial.printf("'%s'\n",token);           
+
+              if(res1 == 0)
+                {
+                  Serial.printf("majorInjury\n");
+                  sprintf(str_msg,"FM%c",(unsigned int) CompleteIn);
+                  Serial2.write(str_msg);
+                  // Serial2.write('1');
+                  // Sec = millis()/1000;
+                }
+              else
+                if(res2 == 0)
+                {
+                  Serial.printf("minorInjury\n");
+                  sprintf(str_msg,"Fm%c",(unsigned int) CompleteIn);
+                  Serial2.write(str_msg);
+                  // Sec = millis()/1000;
+                }
             }
-          else
-            if(res2 == 0)
-            {
-              Serial.printf("minorInjury\n");
-              sprintf(str_msg,"Fm");
-              Serial2.write(str_msg);
-              Sec = millis()/1000;
-            }
+          }
           else
           {
             Serial.printf("Invalid Injury\n");
             buttonCharacteristic->setValue("Invalid_Injury");
             buttonCharacteristic->notify();
           }
-
         }
         else
         {
@@ -218,44 +246,46 @@ void loop() {
   String d = "";
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
-  while(Serial2.available())
+  while(Serial.available())
   {
     
-    ch_msg =char (Serial2.read());
+    ch_msg =char (Serial.read());
     Serial.print(ch_msg);
 
-    if(ch_msg == 'z') //1
-    {
-      // testStr[] = "Request accepted";
-      Serial.print("Request accepted");
-      buttonCharacteristic->setValue("Request_accepted");
-      buttonCharacteristic->notify();
-    }        
-    else if(ch_msg == 'q')  //2
-    {
-      Serial.print("Task Complete");
-      sprintf(testStr,"%d",(int) (-Sec + millis()/1000) );
-      buttonCharacteristic->setValue(testStr);
-      buttonCharacteristic->notify();
-    }        
-    else if(ch_msg == '3')
-    {
-      Serial.print("Task Flushed");
-      // sprintf(testStr,"%d",(int) (-Sec + millis()/1000) );
-      buttonCharacteristic->setValue("Task_Flushed");
-      buttonCharacteristic->notify();
-    //  Serial.print("Task Not accepted or rejected");
-    //  buttonCharacteristic->setValue("Task Not accepted or rejected");        
-    }
-    else 
-    {
+  // //1 Using special character from Robot to ESP 32
+  //   if(ch_msg == '!') //Request Accepted i.e. ack from bot 
+  //   {
+  //     // testStr[] = "Request accepted";
+  //     Serial.print("Request accepted");
+  //     buttonCharacteristic->setValue("accepted");
+  //     buttonCharacteristic->notify();
+  //   }        
+  //   else if(ch_msg == '@') //Last Task Completed
+  //   {
+  //     Serial.print("Task Complete");
+  //     sprintf(testStr,"%s-%d",last(int) (-Sec + millis()/1000) );
+  //     buttonCharacteristic->setValue(testStr);
+  //     buttonCharacteristic->notify();
+  //   }        
+  //   else if(ch_msg == '3')
+  //   {
+  //     Serial.print("Task Flushed");
+  //     // sprintf(testStr,"%d",(int) (-Sec + millis()/1000) );
+  //     buttonCharacteristic->setValue("Task_Flushed");
+  //     buttonCharacteristic->notify();
+  //   //  Serial.print("Task Not accepted or rejected");
+  //   //  buttonCharacteristic->setValue("Task Not accepted or rejected");        
+  //   }
+  //   else 
+  //   {
         d += ch_msg;
         testStr[index++] = ch_msg;
         flag = 1;
-    }
-      
+    // }
+      delay(1); //To enable reading of entrire string
 
   }
+
   if(flag)
   {
     d += '\0';//NULL;
