@@ -22,37 +22,7 @@ volatile unsigned int count = 0;	// Used in ISR of Timer2 to store ms elasped
 unsigned int seconds = 0;			// Stores seconds elasped
 char rx_byte;
 
-void init_timer2(void){
-	cli();	// Turn off global interrupts
 
-	//Setup Timer2 to fire every 1ms
-	TCCR2B = 0x00;        						// Cut off Clock Source to disbale Timer2 while we set it up
-	TCNT2  = 130;         						// Reset Timer Count to 130 out of 255
-	TIFR2  &= ~(1 << TOV2);        				// Timer2 INT Flag Reg: Clear Timer Overflow Flag
-	TIMSK2 |= (1 << TOIE2);        				// Timer2 INT Reg: Timer2 Overflow Interrupt Enable
-	TCCR2A = 0x00;        						// Timer2 Control Reg A: Wave Gen Mode normal
-	TCCR2B |= (1 << CS22) | (1 << CS20);        // Timer2 Control Reg B: Timer Prescaler set to 128 and Start Timer2
-
-	sei();	// Turn on global interrupts
-}
-
-
-//Timer2 Overflow Interrupt Vector
-ISR(TIMER2_OVF_vect) {
-  count++;	// increment after 1 ms               
-  
-  // increment seconds variable after 1000 ms
-  if(count > 999){
-	seconds++;
-	
-	uart3_puts(MESSAGE);    // Send data on UART #0 after 1 second
-
-    count = 0;          
-  }
-  
-  TCNT2 = 130;           	// Reset Timer to 130 out of 255
-  TIFR2  &= ~(1 << TOV2);	// Timer2 INT Flag Reg: Clear Timer Overflow Flag
-};
 
 
 void init_led(void){
@@ -70,7 +40,7 @@ void led_greenOff(void){
 }
 
 
-char uart0_readByte(void){
+char uart3_readByte(void){
 
 	uint16_t rx;
 	uint8_t rx_status, rx_data;
@@ -89,7 +59,7 @@ char uart0_readByte(void){
 
 }
 
-void uart0_SendByte(char rx_byte){
+void uart3_SendByte(char rx_byte){
 
 	uart3_putc(rx_byte);
 
