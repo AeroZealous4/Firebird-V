@@ -103,11 +103,15 @@
 
 <div class="col-md-3 sidebar">
 	<ul class="nav nav-sidebar" style="margin-top: -7%">
-        <li class="active"><a><b>Timer</b></a></li>
+        <li class="active">
+        	<a><b>Timer</b></a>
+        	<button type="button" class="btn btn-info" style="margin-top: 12%; margin-left: 2%; padding-top: 3%; " onclick="startTimer(); document.getElementById('action').innerHTML = 'Scanning Arena...'; document.getElementById('actionID').style.display = 'block'; document.getElementById('responseID').style.display = 'none';">Start</button>
+        	<button type="button" class="btn btn-danger" style="float: right; margin-top: 12%; margin-right: 2%; padding-top: 3%" onclick="onTimesUp();">Reset</button>
+        </li>
     </ul>
-    <div id='timerID' style="height: 22%;" align="center"></div>
+    <div id='timerID' style="height: 22%; margin-top: -32%" align="center"></div>
     <ul class="nav nav-sidebar">
-        <li class="active" style="margin-top: -6%"><a><b>Thingsboard Server Request</b></a></li>
+        <li class="active" style="margin-top: -6%"><a><b>Thingsboard Server - Current Request</b></a></li>
     </ul>
     <pre id='requestID' style="background: white; margin-top: -2%"></pre>
     <br>
@@ -209,19 +213,28 @@
 	</div>
 	`;
 
-	// startTimer();
+	function pausecomp(millis)
+	{
+	    var date = new Date();
+	    var curDate = null;
+	    do { 
+	    	curDate = new Date(); 
+	    } while(curDate-date < millis);
+	}
 
 	function onTimesUp() {
 	  clearInterval(timerInterval);
+	  timePassed = 0;
+	  document.getElementById("base-timer-label").innerHTML = formatTime(TIME_LIMIT);
+	  document.getElementById('actionID').style.display = 'none';
+	  document.getElementById('responseID').style.display = 'block';
 	}
 
 	function startTimer() {
 	  timerInterval = setInterval(() => {
 	    timePassed = timePassed += 1;
 	    timeLeft = TIME_LIMIT - timePassed;
-	    document.getElementById("base-timer-label").innerHTML = formatTime(
-	      timeLeft
-	    );
+	    document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
 	    setCircleDasharray();
 	    setRemainingPathColor(timeLeft);
 
@@ -290,19 +303,49 @@
 
     ticksSocket.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        request = JSON.stringify(data, undefined, 4);
-        console.log('request', request);
-        output('requestID', syntaxHighlight(request));
+        console.log('data', data);
 
-        if (data['method'] == "fetchNearest" || data['method'] == "scan")
+        if ("request" in data)
         {
-        	document.getElementById('action').innerHTML = 'Forwarding Request to Robot...';
-        	document.getElementById('actionID').style.display = "block";
-	    	document.getElementById('responseID').style.display = "none";
-        }
+	        if (data['request']['method'] == "fetchNearest" || data['request']['method'] == "scan")
+	        {
+	        	output('action', 'Forwarding Request to Robot...');
+	        	document.getElementById('actionID').style.display = "block";
+		    	document.getElementById('responseID').style.display = "none";
+	        }
 
-	    // document.getElementById('action').innerHTML = 'Fetching Nearest...';
-	    // document.getElementById('action').innerHTML = 'Scanning Plot...';
+	        request = JSON.stringify(data["request"], undefined, 4);
+	        console.log('request', request);
+	        output('requestID', syntaxHighlight(request));
+	    }
+	    else if ("response" in data)
+	    {
+	    	response = JSON.stringify(data["response"], undefined, 4);
+	        console.log('response', response);
+	    	output('responseID', syntaxHighlight(response));
+	    	document.getElementById('actionID').style.display = "none";
+		    document.getElementById('responseID').style.display = "block";
+	    }
+	    else if ("accepted" in data)
+	    {
+	    	accept = JSON.stringify(data["accept"], undefined, 4);
+	        console.log('response', accept);
+	    	output('responseID', 'Request Accepted.\nPerforming Request...');
+	        document.getElementById('actionID').style.display = "none";
+		    document.getElementById('responseID').style.display = "block";
+
+		    pausecomp(2500);
+
+		    if ("fetch" in data['accept'])
+			    output('action', 'Fetching Nearest...');
+			else if ("scan" in data['accept'])
+	    		output('action', 'Scanning Plot...');
+	    	else
+	    		output('action', 'Scanning Arena...');
+
+	        document.getElementById('actionID').style.display = "block";
+		    document.getElementById('responseID').style.display = "none";
+	    }
     };
 
 </script>
