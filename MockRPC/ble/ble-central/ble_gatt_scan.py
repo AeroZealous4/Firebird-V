@@ -24,4 +24,8 @@ async def main(address):
 
 
 if __name__ == "__main__":
-    asyncio.run(main(address))
+    #if python version >= 3.7
+    #asyncio.run(main())
+    # else
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(main(address))

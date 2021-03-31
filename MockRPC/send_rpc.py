@@ -4,7 +4,7 @@ import time
 import requests
 
 
-TIME = 45
+TIME = 15
 DEVICE_ID = "a9e821a0-8caf-11eb-950e-efef5c07c810"
 BASE = 'https://thingsboard.e-yantra.org/api'
 

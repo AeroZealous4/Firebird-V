@@ -1,46 +1,58 @@
+import sys
 import asyncio
-import platform
-
+import nest_asyncio
 from bleak import BleakClient
 
-LED_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-BUTTON_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
 
 
-address = (
-    "84:CC:A8:66:DE:7E"  # <--- Change to your device's address here if you are using Windows or Linux
-    if platform.system() != "Darwin"
-    else "B9EA5233-37EF-4DD6-87A8-2A875E821C46"  # <--- Change to your device's address here if you are using macOS
-)
+# test_address = "4E:EC:EE:3E:2A:2D"
+# TEST_WRITE_UUID = "0000fff1-0000-1000-8000-00805f9b34fb"
+# TEST_NOTIFY_UUID = "0000fff2-0000-1000-8000-00805f9b34fb"
 
 
-async def notify(client):
 
-    def esp32_response_handler(sender, data):
-        print("BUTTON: {1}".format(sender, data))
+class ESP32_BLE:
 
-    await client.start_notify(BUTTON_UUID, esp32_response_handler)
-    while True:
-        await asyncio.sleep(0.1)
-        # await client.stop_notify(BUTTON_UUID)
+    notify_queue = None
+    write_queue = None
+    loop = None
 
-
-async def run(client):
-    while True:
-        # switchState = await client.read_gatt_char(LED_UUID)
-        # switchState = switchState.decode('utf-8')
-
-        value = bytearray(b'scan-5')
-        await client.write_gatt_char(LED_UUID, value)
-        print(f'LED {value}')
-        await asyncio.sleep(2.0)
+    WRITE_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+    NOTIFY_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
+    BLE_ADRRESS = "84:CC:A8:5F:90:D6"
 
 
-async def main(address):
-    async with BleakClient(address) as client:
-        await client.connect()
-        await asyncio.gather(notify(client), run(client))
+    # async def forward_request(self, request):
+    #     await self.write_queue.put(request)
+    #     await self.run()
 
 
-if __name__ == "__main__":
-    asyncio.run(main(address))
+    async def get_response(self):
+        return await self.notify_queue.get()
+
+    async def esp32_response_handler(self, sender, data):
+        esp_response = "{1}".format(sender, data)
+        await self.notify_queue.put(esp_response)
+
+    async def send(self, request):
+        value = bytearray(request)
+        await self.client.write_gatt_char(self.WRITE_UUID, value)
+        print(f'\n\nForwarded: {value}\n\n')
+            # await asyncio.sleep(10.0)
+
+    async def connect_firebird(self):
+        nest_asyncio.apply()
+        self.notify_queue = asyncio.Queue(maxsize=1)
+        self.loop = asyncio.get_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.client = BleakClient(self.BLE_ADRRESS)
+        await self.client.connect()
+        await self.client.start_notify(self.NOTIFY_UUID, self.esp32_response_handler)
+
+def test():
+    a = ESP32_BLE()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(a.connect_firebird())
+    loop.run_until_complete(a.send("scan-7-25".encode('utf-8')))
+    print(loop.run_until_complete(a.get_response()))
