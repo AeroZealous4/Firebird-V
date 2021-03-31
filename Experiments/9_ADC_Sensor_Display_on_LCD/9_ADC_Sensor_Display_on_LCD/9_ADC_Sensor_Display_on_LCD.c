@@ -44,8 +44,8 @@
 #include <util/delay.h>					// Standard AVR Delay Library
 #include <stdio.h>						// Standard C Library for standard input output
 #include "lcd.h"						// LCD Header file included that contains function definitions essential to deal with LCD
-#include "ADC_Sensor_Display_on_LCD.h"
-// //---------------------------------- GLOBAL VARIABLES -----------------------------------------------------
+
+//---------------------------------- GLOBAL VARIABLES -----------------------------------------------------
 unsigned char ADC_Value;
 unsigned char sharp, distance, adc_reading;
 unsigned int value;
@@ -166,34 +166,34 @@ void print_sensor(char row, char coloumn,unsigned char channel)
  *
  * @details    Initializes ADC, LCD pins and displays the ADC converted data of all the sensors on LCD
  */
-// int main(void) {
+int main(void) {
 	
-// 	unsigned int value;
-// 	adc_port_config();					// Initialize the ADC port
-// 	adc_init();							// Initialize the ADC
+	unsigned int value;
+	adc_port_config();					// Initialize the ADC port
+	adc_init();							// Initialize the ADC
 	
-// 	lcd_port_config();					// Initialize the LCD port
-// 	lcd_init();							// Initialize the LCD
+	lcd_port_config();					// Initialize the LCD port
+	lcd_init();							// Initialize the LCD
 	
-// 	while(1)
-// 	{
-// 		// get the ADC converted data of the sensors from the appropriate channel number
+	while(1)
+	{
+		// get the ADC converted data of the sensors from the appropriate channel number
 		
-// 		BATT_V = ADC_Conversion(batt_sensor_channel);
-// 		BATT_Voltage = ( ( BATT_V * 100 ) * 0.07902 ) + 0.7;
-// 		lcd_numeric_value(1, 1, BATT_Voltage, 4);					// Prints Battery Voltage Status
+		BATT_V = ADC_Conversion(batt_sensor_channel);
+		BATT_Voltage = ( ( BATT_V * 100 ) * 0.07902 ) + 0.7;
+		lcd_numeric_value(1, 1, BATT_Voltage, 4);					// Prints Battery Voltage Status
 
-// 		print_sensor(1, 6, ir_prox_2_sensor_channel);				// Prints value of Analog IR Proximity Sensor 2
-// 		print_sensor(1, 10, ir_prox_3_sensor_channel);				// Prints value of Analog IR Proximity Sensor 3
-// 		print_sensor(1, 14, ir_prox_4_sensor_channel);				// Prints value of Analog IR Proximity Sensor 4
-// 		print_sensor(2, 2, left_wl_sensor_channel);					// Prints value of Left White Line Sensor
-// 		print_sensor(2, 6, center_wl_sensor_channel);				// Prints Value of Center White Line Sensor
-// 		print_sensor(2, 10, right_wl_sensor_channel);				// Prints Value of Right White Line Sensor
+		print_sensor(1, 6, ir_prox_2_sensor_channel);				// Prints value of Analog IR Proximity Sensor 2
+		print_sensor(1, 10, ir_prox_3_sensor_channel);				// Prints value of Analog IR Proximity Sensor 3
+		print_sensor(1, 14, ir_prox_4_sensor_channel);				// Prints value of Analog IR Proximity Sensor 4
+		print_sensor(2, 2, left_wl_sensor_channel);					// Prints value of Left White Line Sensor
+		print_sensor(2, 6, center_wl_sensor_channel);				// Prints Value of Center White Line Sensor
+		print_sensor(2, 10, right_wl_sensor_channel);				// Prints Value of Right White Line Sensor
 
-// 		sharp = ADC_Conversion(sharp_sensor_channel);				// Stores the Analog value of front Sharp connected to ADC channel 11 into variable "sharp"
-// 		value = Sharp_GP2D12_estimation(sharp);						// Stores Distance calculated in a variable "value"
-// 		lcd_numeric_value(2,14,value,3); 							// Prints Value Of Distance in MM measured by Sharp Sensor
+		sharp = ADC_Conversion(sharp_sensor_channel);				// Stores the Analog value of front Sharp connected to ADC channel 11 into variable "sharp"
+		value = Sharp_GP2D12_estimation(sharp);						// Stores Distance calculated in a variable "value"
+		lcd_numeric_value(2,14,value,3); 							// Prints Value Of Distance in MM measured by Sharp Sensor
 
-// 	}
-// }
+	}
+}
 //---------------------------------- END ------------------------------------------------------------------

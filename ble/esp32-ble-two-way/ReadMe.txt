@@ -8,6 +8,7 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
 			(c-1) "scan-<plot_num>-<complete_in>": plot_number is number from 1 to 16, eg "scan-5-20"
 			(c-2) "fetch-major-<complete_in>": eg: fetch-major-40
 			(c-3) "fetch-minor-<complete_in>": eg: fetch-minor-40
+			(c-4) "no-request"
 	(1-2) buttonCharacteristic: Notify
 		(a)	NOTIFY_CHARACTERISTIC_UUID "8801f158-f55e-4550-95f6-d260381b99e7"
 		(b) Used for communication from ESP32 to laptop
@@ -22,7 +23,7 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
 						"major-25" : major injury
 						"no-25" : no injury
 					e.g. for fetch nearest request:
-						"<plot_num>-25"
+						"fetch-<plot_num>-25"
 
 			(c-6) "ignore" : If robot decides to ignore requested task then this string will be sent
 (2) LED on ESP32: It will toggle each time new request is received from laptop to ESP32
