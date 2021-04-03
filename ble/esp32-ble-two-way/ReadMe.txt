@@ -1,5 +1,4 @@
 BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
-
 (1) Two characteristics:
 	(1-1) ledCharacteristic: Read & write,
 		(a) WRITE_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"

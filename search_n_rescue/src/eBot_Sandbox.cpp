@@ -34,7 +34,7 @@ void init_all_peripherals(void)
 
 	timer5_init(); //For PWM
 
-	Comm_ESP32_init(); //Init timer3 for time keeping
+	Comm_ESP32_init(); //Init timer3 for time keeping and buzzer
 	//Uart Initialization
 	uart_init1();	//UART3 of atmega
 }
@@ -42,18 +42,18 @@ void init_all_peripherals(void)
 void Task_1B(void)
 {
 	forward_wls(1); //Goes to next node
-	sprintf(str,"1st Node");
+	sprintf(str,"1st Node\n");
 	uart_send_string(str);
 	forward_wls(1); //Goes to next node i.e. Mid point of required node
-	sprintf(str,"Mid Node");
+	sprintf(str,"Mid Node\n");
 	uart_send_string(str);
 	velocity(Cruise_Vel0,Cruise_Vel0);
 	left_degrees(90); //Left turn by 90Degrees
-	sprintf(str,"90 Degree Left turn");
+	sprintf(str,"90 Degree Left turn\n");
 	uart_send_string(str);
 	velocity(Cruise_Vel,Cruise_Vel);
 	forward_mm(180);
-	sprintf(str,"Center of block reached");
+	sprintf(str,"Center of block reached\n");
 	uart_send_string(str);
 
 	char Type_Inj = Sense_Color();
@@ -69,21 +69,21 @@ void Task_1B(void)
 		Set_NoInjury();
 
 	back_mm(180);
-	sprintf(str,"Back on line");
+	sprintf(str,"Back on line\n");
 	uart_send_string(str);
 
 	left_turn_wls();
-	sprintf(str,"Left Turn");
+	sprintf(str,"Left Turn\n");
 	uart_send_string(str);
 
 	forward_wls(1); //Goes to next node
-	sprintf(str,"1st Node");
+	sprintf(str,"1st Node\n");
 	uart_send_string(str);
 
 	forward_wls(1); //Goes to next node
-	sprintf(str,"Start Location");
+	sprintf(str,"Start Location\n");
 	uart_send_string(str);
-	sprintf(str,"Finished");
+	sprintf(str,"Finished\n");
 	lcd_string_EE(str);
 }
 
@@ -99,20 +99,28 @@ void Controller(void)
 
 	init_all_peripherals();
 	calibrate();
+	sprintf(str,"Cal Done\n");
+	uart_send_string(str);
+
 	Update_Command();
 
-	if(Is_Command())
+	// Task_1B();		//Complete task related to 1B
+	// int i=1; 
+	while (1)
 	{
-		Cmd_Accepted(); //Send ack that cmd is accepted
-		Task_1B();		//Complete task related to 1B
-		Task_Complete(); 	
-	}
+			/* code */
+		Update_Command();
+		// _delay_ms(100);	//Delay
+		if(Is_Command())
+		{
+			Cmd_Accepted(); //Send ack that cmd is accepted
+			Task_1B();		//Complete task related to 1B
+			Task_Complete(); 	
+			// i = 0;
+		}
 
-
-	while ((1));
-	{
-		/* code */
 	}
+	while(1);
 	
 /*
 

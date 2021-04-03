@@ -15,7 +15,8 @@ class ESP32_BLE:
 
     WRITE_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
     NOTIFY_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
-    BLE_ADRRESS = "84:CC:A8:5F:90:D6"
+    #BLE_ADRRESS = "84:CC:A8:5F:90:D6"
+    BLE_ADRRESS = "3C:71:BF:4C:81:2A"
 
 
     async def get_response(self):

@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "Comm_ESP32.h"
+#include "uart.h"
 #include "atmega_to_esp32_uart.h"
 #include <avr/io.h>				// Standard AVR IO Library
 #include <util/delay.h>			// Standard AVR Delay Library
 #include <avr/interrupt.h>		// Standard AVR Interrupt Library
 #include "firebird_avr.h"		// Header file included that contains macro definitions essential for Firebird V robot
 
+#define DEBUG_COMM 1 
 
 #define delay_uart 100 //Uart not working if delay is not provided , Tune for optimal performance
 
@@ -106,12 +108,12 @@ void Update_Command(void) //Updates any command received from ESP32
 
     char ch_msg = uart3_readByte();
 
-    while(ch_msg!= -1)
+    if(ch_msg!= -1)
     {
-        #ifdef DEBUG_COMM
-            sprintf(str_temp,"Comm_ESP32:");
-            uart_send_string(str_temp);
-        #endif
+        // #ifdef DEBUG_COMM
+        //     sprintf(str_temp,"Comm_ESP32:");
+        //     uart_send_string(str_temp);
+        // #endif
 
         if( (ch_msg!= -1) && ch_msg == 'S')
         {
@@ -206,12 +208,16 @@ void Update_Command(void) //Updates any command received from ESP32
                 #ifdef DEBUG_COMM
                     sprintf(str_temp,"%d\n",(unsigned int) ch_msg);
                     uart_send_string(str_temp);
+                    sprintf(str_temp,"Cmd Rx\n");
+	                uart_send_string(str_temp);
                 #endif
                     Start_Timer();
                     Fetch_Minor = true;
                     Fetch_Major= false;
                     Scan = false;
                     Cmd_Rx = true;
+
+                    uart3_flush();
                 }                     
             }
         }
@@ -222,6 +228,11 @@ bool Is_Command(void)
 {
     if(Cmd_Rx)
     {
+
+        #ifdef DEBUG_COMM
+            sprintf(str_temp,"Is_Cmd:true\n");
+            uart_send_string(str_temp);
+        #endif 
         Cmd_Rx = false;
         return true;
     }
@@ -296,6 +307,7 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
 {
     // Stop_Timer();        //Will stop after 2 sec completes
     Buzzer_state = true;    //Will be false after 2 secs
+    buzzer_on();
 
     if(Is_Scan())
     {

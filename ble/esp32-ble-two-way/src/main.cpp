@@ -99,6 +99,7 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                
                 sprintf(str_msg,"S%c%c",(unsigned char) switchState1,(unsigned char)  CompleteIn);
                 Serial2.write(str_msg);
+                Serial.write(str_msg);
                 // Sec = millis()/1000;
               }
             }
@@ -131,6 +132,7 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                   Serial.printf("majorInjury\n");
                   sprintf(str_msg,"FM%c",(unsigned int) CompleteIn);
                   Serial2.write(str_msg);
+                  Serial.write(str_msg);
                   // Serial2.write('1');
                   // Sec = millis()/1000;
                 }
@@ -140,6 +142,7 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                   Serial.printf("minorInjury\n");
                   sprintf(str_msg,"Fm%c",(unsigned int) CompleteIn);
                   Serial2.write(str_msg);
+                  Serial.write(str_msg);
                   // Sec = millis()/1000;
                 }
             }
@@ -246,10 +249,10 @@ void loop() {
   String d = "";
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
-  while(Serial.available())
+  while(Serial2.available())
   {
     
-    ch_msg =char (Serial.read());
+    ch_msg =char (Serial2.read());
     Serial.print(ch_msg);
 
   // //1 Using special character from Robot to ESP 32

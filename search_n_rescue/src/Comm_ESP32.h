@@ -9,7 +9,7 @@ Following APIS can be used for processing of communication
 #ifndef COMM_ESP32_H_
 #define COMM_ESP32_H_
 
-#define DEBUG_COMM 1 //Comment if debug MSG is not required
+// #define DEBUG_COMM 1 //Comment if debug MSG is not required
                      //Debug data will be sent to ESP32
 
 void Comm_ESP32_init(void); //Inititalizes timer

@@ -22,7 +22,7 @@ async def main():
         print("Data in Adv: " + data)
 
 #if python version >= 3.7
-#asyncio.run(main())
+asyncio.run(main())
 # else
-loop = asyncio.get_event_loop()
-loop.run_until_complete(main())
+#loop = asyncio.get_event_loop()
+#loop.run_until_complete(main())
