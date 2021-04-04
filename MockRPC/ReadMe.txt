@@ -1,4 +1,6 @@
-BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
+BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6") for Server requests:
+====================================
+
 (1) Two characteristics:
 	(1-1) ledCharacteristic: Read & write,
 		(a) WRITE_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
@@ -23,7 +25,43 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
 						"major-25" : major injury
 						"no-25" : no injury
 					e.g. for fetch nearest request:
-						"fetch-<plot_num>-25"
+						"fetch-<plot_num>-<time_taken>"
 
 			(c-6) "ignore" : If robot decides to ignore requested task then this string will be sent
 (2) LED on ESP32: It will toggle each time new request is received from laptop to ESP32
+
+
+
+BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6") for tracking robot:
+====================================
+
+(1) Debris Detection:
+		mesage format: "debris-<current_node>-<direction>"
+		constraints: 	(a) 1 <= current_node <= 81
+						(b) direction:	'n' ==> north
+										's' ==> south
+										'w' ==> west
+										'e' ==> east
+		example: 	"debris-10-n"
+
+(2)	Injury Detection:
+		message format: "scanned-<plot_num>-<injury_color>"
+		constraints: 	(a) 1 <= plot_num <= 16
+						(b) injuryColor: 	"red"	==> major injury
+											"green"	==> minor injury
+		example: 	"scanned-10-red"
+
+(3) Robot action:
+		(a) Forward motion:
+				message format: "forward-<current_node>-<destination_node>"
+				constraints: 	(a) 1 <= current_node <= 81
+							 	(b) 1 <= destination_node <= 81
+
+				example:	"forward-5-6"
+
+		(b)	Rotate motion:
+				message format: "rotate-<current_node>-<direction>"
+				constraints:	direction:	'l' ==> left (90 rotate)
+											'r'	==> right (90 rotate)
+											'a'	==> 180 rotate
+				example:	"rotate-10-l"
