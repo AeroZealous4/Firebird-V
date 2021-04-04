@@ -60,8 +60,12 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6") 
 				example:	"forward-5-6"
 
 		(b)	Rotate motion:
-				message format: "rotate-<current_node>-<direction>"
-				constraints:	direction:	'l' ==> left (90 rotate)
-											'r'	==> right (90 rotate)
-											'a'	==> 180 rotate
-				example:	"rotate-10-l"
+				message format: "rotate-<current_node>-<facing_direction>-<rotation_direction>"
+				constraints:	(a) rotation_direction:	'l' ==> left (90 rotate)
+														'r'	==> right (90 rotate)
+														'a'	==> 180 rotate
+								(b) facing_direction: 	'n' ==> north
+														's' ==> south
+														'w' ==> west
+														'e' ==> east
+				example:	"rotate-10-n-l"
