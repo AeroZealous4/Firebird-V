@@ -28,6 +28,7 @@
 	#include "atmega_to_esp32_uart.h"
 	#include "Comm_ESP32.h"
 	#include "Bot_Motion.h"
+	#include "shortest_path.h"
 #endif
 // #include "firebird_avr.h"//"eBot_MCU_Predef.h"
 // #include "ADC_Sensor_Display_on_LCD.h"
