@@ -28,7 +28,7 @@ void Cmd_Accepted(void); //Sends ack to ESP32 indicating acceptance of cmd
 void Cmd_Ignore(void); //Sends msg to ESP32 i.e. Cmd is rejected/flushed and will not be executed
 
 unsigned int Time_Completed(void); //Returns time in secs after reception of valid command
-
+                                    //Its to keep track of elapsed time and to compare with Complete_In time.
 /*After completion of task*/
 //Only one function needs to be called 
     //Call corresponding fn for response to scan request 

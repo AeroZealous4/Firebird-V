@@ -88,8 +88,75 @@ void Task_1B(void)
 }
 
 /**
- * @brief  Checks latest msg coming from ESP32 and trigger respective task
+ * @brief  Scan arena and executes any task if encountered before that
  */
+bool Task_2B(void)
+{
+	// bool Is_Finished = false;
+	static bool In_Path = false; // If bot is traveling to desired loc then true 
+	static int Current_Node = 0 ;
+	static int Nxt_Node = 0 ;
+	static int Dest_Node = 66;
+
+	if( In_Path == false)
+	{
+		if(Inj_at_Plot(Next_Plot_to_Scan()) == '0')
+		{
+			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Current_Node);
+			dijkstra(Dest_Node);	//Updates path to travel to Dest node
+			In_Path = true;
+		}
+		else
+		{
+			Plot_Scan_Compl(); //Current plot is already scanned
+			In_Path = false;
+		}
+		
+	}
+	else if( In_Path == true)
+	{
+		Nxt_Node = Next_Node(Current_Node);
+
+		if( ~(Nxt_Node == -1) )
+		{
+			turn_head( Next_Dir(Current_Node, Nxt_Node) );	//Rotate to desired direction
+			forward_wls(1);	//Move to next node
+			Current_Node = Nxt_Node;
+			In_Path = true;
+		}
+		else if(Next_Plot_to_Scan()!=66)//Plot reached
+		{
+			turn_head_to_plot(Get_Dir_Plot());
+
+			forward_mm(180);
+				// sprintf(str,"Center of block no: %d reached\n",Next_Plot_to_Scan());
+				// uart_send_string(str);
+
+			char Type_Inj = Sense_Color();	//Scan Injury
+
+			if(Type_Inj == 'R')
+				sprintf(str,"Block no: %d with Major Injury\n",Next_Plot_to_Scan());
+			else if(Type_Inj == 'G')
+				sprintf(str,"Block no: %d with Minor Injury\n",Next_Plot_to_Scan());
+			else
+				sprintf(str,"Block no: %d with No Injury\n",Next_Plot_to_Scan());
+			
+			Plot_Scan_Compl();
+
+			back_mm(180);
+
+			In_Path = false;
+		}
+		else if(Next_Plot_to_Scan()==66)//Goal reached
+		{
+			Plot_Scan_Compl();
+			In_Path = false;
+			return true;
+		}
+	}
+	// Is_Finished = true;
+	return false;
+}
 /**
  * @brief      Executes the logic to achieve the aim of Project
  */
@@ -99,27 +166,37 @@ void Controller(void)
 
 	init_all_peripherals();
 	calibrate();
+	// char next = Next_Dir(4, 5); 
+
 	sprintf(str,"Cal Done\n");
 	uart_send_string(str);
 
 	Update_Command();
 
-	// Task_1B();		//Complete task related to 1B
+	Task_1B();		//Complete task related to 1B
 	// int i=1; 
-	while (1)
-	{
-			/* code */
-		Update_Command();
-		// _delay_ms(100);	//Delay
-		if(Is_Command())
-		{
-			Cmd_Accepted(); //Send ack that cmd is accepted
-			Task_1B();		//Complete task related to 1B
-			Task_Complete(); 	
-			// i = 0;
-		}
+	// while (1)
+	// {
+	// 		/* code */
+	// 	Update_Command();
+	// 	// _delay_ms(100);	//Delay
+	// 	if(Is_Command())
+	// 	{
+	// 		Cmd_Accepted(); //Send ack that cmd is accepted
+	// 		Task_1B();		//Complete task related to 1B
+	// 		_delay_ms(1000); //1 Sec delay
+	// 		Task_Complete(); //Sends ack to ESP32	
+	// 		// i = 0;
+	// 		break;
+	// 	}
+	// 	// if(Task_2B())
+	// 	// 	break;
+	// }
 
-	}
+//Operation Search and Rescue finished successfully
+	lcd_clear();
+	sprintf(str,"Scan Finished\n");
+	lcd_string_EE(str);
 	while(1);
 	
 /*
