@@ -42,18 +42,18 @@ void init_all_peripherals(void)
 void Task_1B(void)
 {
 	forward_wls(1); //Goes to next node
-	sprintf(str,"1st Node\n");
+	sprintf(str,"1st Node\n^");
 	uart_send_string(str);
 	forward_wls(1); //Goes to next node i.e. Mid point of required node
-	sprintf(str,"Mid Node\n");
+	sprintf(str,"Mid Node\n^");
 	uart_send_string(str);
 	velocity(Cruise_Vel0,Cruise_Vel0);
 	left_degrees(90); //Left turn by 90Degrees
-	sprintf(str,"90 Degree Left turn\n");
+	sprintf(str,"90 Degree Left turn\n^");
 	uart_send_string(str);
 	velocity(Cruise_Vel,Cruise_Vel);
 	forward_mm(180);
-	sprintf(str,"Center of block reached\n");
+	sprintf(str,"Center of block reached\n^");
 	uart_send_string(str);
 
 	char Type_Inj = Sense_Color();
@@ -69,27 +69,122 @@ void Task_1B(void)
 		Set_NoInjury();
 
 	back_mm(180);
-	sprintf(str,"Back on line\n");
+	sprintf(str,"Back on line\n^");
 	uart_send_string(str);
 
 	left_turn_wls();
-	sprintf(str,"Left Turn\n");
+	sprintf(str,"Left Turn\n^");
 	uart_send_string(str);
 
 	forward_wls(1); //Goes to next node
-	sprintf(str,"1st Node\n");
+	sprintf(str,"1st Node\n^");
 	uart_send_string(str);
 
 	forward_wls(1); //Goes to next node
-	sprintf(str,"Start Location\n");
+	sprintf(str,"Start Location\n^");
 	uart_send_string(str);
-	sprintf(str,"Finished\n");
+	sprintf(str,"Finished\n^");
 	lcd_string_EE(str);
 }
 
 /**
- * @brief  Checks latest msg coming from ESP32 and trigger respective task
+ * @brief  Scan arena and executes any task if encountered before that
  */
+bool Task_2B(void)
+{
+	// bool Is_Finished = false;
+	static bool In_Path = false; // If bot is traveling to desired loc then true 
+	static int Current_Node = 0 ;
+	static int Nxt_Node = 0 ;
+	static int Dest_Node = 66;
+
+	sprintf(str,"In Task 2B\n^");
+	uart_send_string(str);
+	if( In_Path == false)
+	{
+		if(Inj_at_Plot(Next_Plot_to_Scan()) == '0')
+		{
+			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Current_Node);
+
+			sprintf(str,"Before dikstra, Dest node:%d\n",Dest_Node);
+			uart_send_string(str);
+
+			dijkstra(Dest_Node);	//Updates path to travel to Dest node
+			In_Path = true;
+
+			sprintf(str,"Des Plot Nu:%d\n",Next_Plot_to_Scan());
+			uart_send_string(str);
+		}
+		else
+		{
+			Plot_Scan_Compl(); //Current plot is already scanned
+			In_Path = false;
+
+			sprintf(str,"Plot Scan Complete\n^");
+			uart_send_string(str);
+		}
+		
+	}
+	else if( In_Path == true)
+	{
+		Nxt_Node = Next_Node(Current_Node);
+
+		sprintf(str,"Moving to node:%d\n",Nxt_Node);
+		uart_send_string(str);
+		if( Current_Node != Dest_Node )
+		{
+			turn_head( Next_Dir(Current_Node, Nxt_Node) );	//Rotate to desired direction
+			forward_wls(1);	//Move to next node
+			Current_Node = Nxt_Node;
+			In_Path = true;
+
+			sprintf(str,"Reached node:%d\n",Nxt_Node);
+			uart_send_string(str);
+		}
+		else if(Next_Plot_to_Scan()!=66)//Plot reached
+		{
+			sprintf(str,"Plot nu %d reached\n",Next_Plot_to_Scan());
+			uart_send_string(str);
+
+			turn_head_to_plot(Get_Dir_Plot());
+
+			sprintf(str,"Rotation finished\n^");
+			uart_send_string(str);
+
+			forward_mm(180);
+				// sprintf(str,"Center of block no: %d reached\n",Next_Plot_to_Scan());
+				// uart_send_string(str);
+
+			char Type_Inj = Sense_Color();	//Scan Injury
+
+			if(Type_Inj == 'R')
+				sprintf(str,"Block no: %d with Major Injury\n",Next_Plot_to_Scan());
+			else if(Type_Inj == 'G')
+				sprintf(str,"Block no: %d with Minor Injury\n",Next_Plot_to_Scan());
+			else
+				sprintf(str,"Block no: %d with No Injury\n",Next_Plot_to_Scan());
+			
+			uart_send_string(str);
+
+			Plot_Scan_Compl();
+
+			back_mm(180);
+
+			In_Path = false;
+
+			sprintf(str,"Plot scan compl^^");
+			uart_send_string(str);
+		}
+		else if(Next_Plot_to_Scan()==66)//Goal reached
+		{
+			Plot_Scan_Compl();
+			In_Path = false;
+			return true;
+		}
+	}
+	// Is_Finished = true;
+	return false;
+}
 /**
  * @brief      Executes the logic to achieve the aim of Project
  */
@@ -99,11 +194,19 @@ void Controller(void)
 
 	init_all_peripherals();
 	calibrate();
-	sprintf(str,"Cal Done\n");
+	sprintf(str,"Cal Done\n^");
 	uart_send_string(str);
 
 	Update_Command();
 
+	sprintf(str,"Command Update\n^");
+	uart_send_string(str);
+	while (~Task_2B())
+	{
+		continue;
+	}
+	sprintf(str,"Task2B complete\n^");
+	uart_send_string(str);
 	// Task_1B();		//Complete task related to 1B
 	// int i=1; 
 	while (1)
@@ -125,7 +228,7 @@ void Controller(void)
 /*
 
 	#ifdef DEBUG
-		sprintf(str,"Cal Done, Min Max\n");
+		sprintf(str,"Cal Done, Min Max\n^");
 		uart_send_string(str);
 		sprintf(str,"%d %d, %d %d,%d %d\n",leftMin,leftMax,centerMin,centerMax,rightMin,rightMax);
 		uart_send_string(str);

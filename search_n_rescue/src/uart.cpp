@@ -1464,6 +1464,7 @@ void uart3_puts(const char *s)
 	while (*s) {
 		uart3_putc(*s++);
 	}
+	// uart3_putc('\0');
 
 } /* uart3_puts */
 

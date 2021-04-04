@@ -281,6 +281,12 @@ void loop() {
   //   }
   //   else 
   //   {
+
+    if(ch_msg=='^')
+    {
+      flag = 1;
+      break;
+    }
         d += ch_msg;
         testStr[index++] = ch_msg;
         flag = 1;
