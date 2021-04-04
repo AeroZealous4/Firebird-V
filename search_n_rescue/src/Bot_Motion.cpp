@@ -42,8 +42,37 @@ int rightMax = 0;
 int centerMin = 4095;
 int centerMax = 0;
 
-unsigned char getSensorPercent(int value, int min, int max);
+// To store the eBot's current and Goal location
+typedef struct
+{
+	int x, y;
+}tuple;
+tuple curr_loc = {4,0}, goal_loc = {4,5};
+//Current Plot number
+// int curr_dir = 0;
+int curr_plot = 0;
+// To store the direction in which eBot is currently facing
+//N=0,E=1,S=2,W=3, Null = 5
+char curr_dir = 'N';
+int curr_node = 0;
+
+
 //---------------------------------- FUNCTIONS ----------------------------------
+unsigned char getSensorPercent(int value, int min, int max);
+
+//Returns current heading
+//Output: char : 'N','E','S','W','0';
+char Get_Curr_Head(void)
+{
+	return curr_dir;
+}
+//Returns current Node number
+//Output: int
+int Get_Curr_Node(void)
+{
+	return curr_node;
+}
+
 /*
 *
 * Function Name: Update_Read
@@ -422,4 +451,170 @@ void right_turn_wls(void)
 					break; //Next node reached
 				}
 		}
+}
+
+/*
+*
+* Function Name: turn_head(const char * Head)
+* Input: char Head: desired direction
+*	Obsolete: const char * : Pointer pointing to const char string, Desired direction
+* Output: void
+* Logic: Compares current heading and desired heading and rotate accordingly
+*/
+void turn_head(char Head)
+{
+//	char H = 'N';
+//	H = Head[0];
+	char H = '0';
+	H =Head;
+	if(H==curr_dir || H=='0') //5 = '0'
+		return;
+
+	switch(curr_dir)
+	{
+		case 'N':
+				switch(H)
+				{
+					case 'E':
+							  right_turn_wls();
+								break;
+					case 'S':
+							right_degrees(90); //Left turn by 90Degreesright_turn_wls();
+							right_turn_wls();
+							  break;
+					case 'W':
+						left_turn_wls();
+							  break;
+				}
+				break;
+		case 'E':
+				switch(H)
+				{
+					case 'N':
+						left_turn_wls();
+								break;
+					case 'S':
+							right_turn_wls();
+							  break;
+					case 'W':
+							right_degrees(90); //right_turn_wls();
+							  right_turn_wls();
+							  break;
+				}
+				break;
+		case 'S':
+				switch(H)
+				{
+					case 'W':
+							right_turn_wls();
+								break;
+					case 'N':
+							right_degrees(90); //right_turn_wls();
+							  right_turn_wls();
+							  break;
+					case 'E':
+						left_turn_wls();
+							  break;
+				}
+				break;
+		case 'W':
+			switch(H){
+					case 'N':
+						right_turn_wls();
+								break;
+					case 'E':
+							right_degrees(90); //right_turn_wls();
+							right_turn_wls();
+							  break;
+					case 'S':
+						left_turn_wls();
+							  break;
+				}
+				break;
+	}
+
+	curr_dir = H;
+}
+
+/*
+*
+* Function Name: turn_head_to_plot(char Head)
+* Input: char Head: desired direction which is center of a plot
+* Obsolete: const char * : Pointer pointing to const char string, Desired direction
+* Output: void
+* Logic: Compares current heading and desired heading and rotate accordingly
+*/
+void turn_head_to_plot(char Head)
+{
+//	char H = 'N';
+//	H = Head[0];
+	char H = '0';
+	H =Head;
+	if(H==curr_dir || H=='0') //5 = '0'
+		return;
+
+	switch(curr_dir)
+	{
+		case 'N':
+				switch(H)
+				{
+					case 'E':
+							  right_degrees(90);//right_turn_wls();
+								break;
+					case 'S':
+							right_degrees(90); //Left turn by 90Degreesright_turn_wls();
+							right_degrees(90); //right_turn_wls();
+							  break;
+					case 'W':
+							left_degrees(90);
+							  break;
+				}
+				break;
+		case 'E':
+				switch(H)
+				{
+					case 'N':
+						left_degrees(90);//left_turn_wls();
+								break;
+					case 'S':
+							right_degrees(90); //right_turn_wls();
+							  break;
+					case 'W':
+							right_degrees(90); //right_turn_wls();
+							right_degrees(90); //  right_turn_wls();
+							  break;
+				}
+				break;
+		case 'S':
+				switch(H)
+				{
+					case 'W':
+							right_degrees(90); //right_turn_wls();
+								break;
+					case 'N':
+							right_degrees(90); //right_turn_wls();
+							right_degrees(90); //  right_turn_wls();
+							  break;
+					case 'E':
+						left_degrees(90);//left_turn_wls();
+							  break;
+				}
+				break;
+		case 'W':
+			switch(H){
+					case 'N':
+						right_degrees(90); //right_turn_wls();
+								break;
+					case 'E':
+							right_degrees(90); //right_turn_wls();
+							right_degrees(90); //right_turn_wls();
+							  break;
+					case 'S':
+						left_degrees(90);//left_turn_wls();
+							  break;
+				}
+				break;
+	}
+
+	curr_dir = H;
 }
