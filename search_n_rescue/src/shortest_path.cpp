@@ -116,8 +116,8 @@ int Plot_Node_Dir_Index = 0;
 //Scanning plot sequence
 int Plot_Seq[17] = {13,9,5,1,2,6,10,14,15,11,7,3,4,8,12,16,17};
 //Scan result: 'M':Major Injury,'m':Minor Injury,'N':No enjury,'0':Not yet scanned
-char Plot_Inj[16] = {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
-int Next_Plot_to_Scan_Indx = 0;
+char Plot_Inj[18] = {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
+int Next_Plot_to_Scan_Indx = 12;
 void Scan_Res(int plot_nu,char inj)
 {
 	if(plot_nu<17 && plot_nu > 0)
@@ -131,6 +131,8 @@ char Inj_at_Plot(int plot_nu)
 }
 int Next_Plot_to_Scan(void) //Returns -1 if scan is complete
 {
+	if(Next_Plot_to_Scan_Indx >= 17)
+		return -1;
 	return Plot_Seq[Next_Plot_to_Scan_Indx];
 }
 void Plot_Scan_Compl(void)

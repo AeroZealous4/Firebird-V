@@ -411,7 +411,7 @@ void forward_wls(unsigned char node)
 void left_turn_wls(void)
 {
 	velocity(Cruise_Vel0, Cruise_Vel0);	
-	left_degrees(85);
+	left_degrees(65);
 	velocity (Cruise_Vel0, Cruise_Vel0);
 	left();
 	// _delay_ms(turn_delay);	//Tune the delay
@@ -438,7 +438,7 @@ void left_turn_wls(void)
 void right_turn_wls(void)
 {
 	velocity (Cruise_Vel0, Cruise_Vel0);	
-	right_degrees(85);
+	right_degrees(65);
 	velocity (Cruise_Vel0, Cruise_Vel0);
 	right();
 	// _delay_ms(turn_delay);	//Tune the delay
