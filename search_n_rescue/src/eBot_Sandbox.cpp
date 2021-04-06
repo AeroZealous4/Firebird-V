@@ -88,23 +88,132 @@ void Task_1B(void)
 }
 
 /**
+ * @brief  Checks for new cmd and if any then executes it depending on conditions
+ * Returns: true if cmd is entertained and false if not
+ */
+bool Ent_Cmd(void)
+{
+	int Req_Plot_No=11,Nxt_Node;
+	int Dest_Node=66;
+
+	Update_Command();
+
+	if(Is_Command())
+	{
+
+		sprintf(str,"Command Received^");
+		uart_send_string(str);
+
+		if( Is_Scan() )
+		{
+			Dest_Node = Min_Dist_Node_Fr_Plot( Scan_Plot_No(),Get_Curr_Node());
+			sprintf(str,"Req to scan Plot Nu:%d\n^",Scan_Plot_No());
+			uart_send_string(str);
+			Req_Plot_No = Scan_Plot_No();
+		}					
+		else if( Is_Major() )
+			;
+		else if( Is_Minor() )
+			;
+
+		Cmd_Accepted(); //Send ack that cmd is accepted
+
+		sprintf(str,"Scan dikstra, Dest node:%d\n^",Dest_Node);
+		uart_send_string(str);
+
+		dijkstra(Dest_Node);	//Updates path to travel to Dest node
+
+
+
+	
+		while( Get_Curr_Node() != Dest_Node )	//Goes to next node
+		{
+			Nxt_Node = Next_Node(Get_Curr_Node());
+
+			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
+			uart_send_string(str);
+			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
+			forward_wls(1);	//Move to next node
+			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
+		
+			sprintf(str,"Reached node:%d\n^",Nxt_Node);
+			uart_send_string(str);
+		}
+		
+		if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
+		{
+			sprintf(str,"Plot nu %d reached\n^",Req_Plot_No);
+			uart_send_string(str);
+
+			turn_head_to_plot(Get_Dir_Plot());
+
+			sprintf(str,"Rotation finished\n^");
+			uart_send_string(str);
+
+			forward_mm(180);
+				// sprintf(str,"Center of block no: %d reached\n^",Next_Plot_to_Scan());
+				// uart_send_string(str);
+
+			char Type_Inj = Sense_Color();	//Scan Injury
+
+			if(Type_Inj == 'R')
+			{
+				sprintf(str,"Plot no: %d with Major Injury\n^",Req_Plot_No);
+				Scan_Res(Req_Plot_No,'M');
+				Set_Major();
+			}				
+			else if(Type_Inj == 'G')
+			{
+				sprintf(str,"Plot no: %d with Minor Injury\n^",Req_Plot_No);
+				Scan_Res(Req_Plot_No,'m');
+				Set_Minor();
+			}				
+			else
+			{
+				sprintf(str,"Plot no: %d with No Injury\n^",Req_Plot_No);
+				Scan_Res(Req_Plot_No,'N');
+				Set_NoInjury(); 
+			}			
+			uart_send_string(str);
+
+			Task_Complete(); //Req Full filled
+			back_mm(180);
+			sprintf(str,"Plot scan compl^");
+			uart_send_string(str);
+		}
+
+		return true;
+	}
+	return false;
+}
+/**
  * @brief  Scan arena and executes any task if encountered before that
  */
 bool Task_2B(void)
 {
 	// bool Is_Finished = false;
 	static bool In_Path = false; // If bot is traveling to desired loc then true 
-	static int Current_Node = 0;
+	// static int Current_Node = 0;
 	static int Nxt_Node = 0;
 	static int Dest_Node = 66;	//Final goal
 
+
 	// sprintf(str,"In Task 2B\n^");
 	// uart_send_string(str);
+	//Check if req is there, if it is there then take appropriate action
+
+	if(Ent_Cmd()) //Executes cmd if any first 
+	{
+		In_Path = false; // Thus scanning of node again starts
+	}
+
 	if(In_Path == false)
 	{
 		if(Inj_at_Plot(Next_Plot_to_Scan()) == '0')
 		{
-			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Current_Node);
+
+			
+			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Get_Curr_Node());
 
 			sprintf(str,"Before dikstra, Dest node:%d\n^",Dest_Node);
 			uart_send_string(str);
@@ -127,16 +236,17 @@ bool Task_2B(void)
 	}
 	else if( In_Path == true)
 	{
-		Nxt_Node = Next_Node(Current_Node);
+		Nxt_Node = Next_Node(Get_Curr_Node());
 
 
-		if( Current_Node != Dest_Node )	//Goes to next node
+		if( Get_Curr_Node() != Dest_Node )	//Goes to next node
 		{
 			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
 			uart_send_string(str);
-			turn_head( Next_Dir(Current_Node, Nxt_Node) );	//Rotate to desired direction
+			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_wls(1);	//Move to next node
-			Current_Node = Nxt_Node;
+			Set_Curr_Node(Nxt_Node);
+
 			In_Path = true;
 
 			sprintf(str,"Reached node:%d\n^",Nxt_Node);
@@ -159,16 +269,23 @@ bool Task_2B(void)
 			char Type_Inj = Sense_Color();	//Scan Injury
 
 			if(Type_Inj == 'R')
+			{
 				sprintf(str,"Plot no: %d with Major Injury\n^",Next_Plot_to_Scan());
+				Scan_Res(Next_Plot_to_Scan(),'M');
+			}				
 			else if(Type_Inj == 'G')
-				sprintf(str,"Plot no: %d with Minor Injury\n^",Next_Plot_to_Scan());
+			{
+                sprintf(str,"Plot no: %d with Minor Injury\n^",Next_Plot_to_Scan());
+			    Scan_Res(Next_Plot_to_Scan(),'m');
+			}
 			else
+			{
 				sprintf(str,"Plot no: %d with No Injury\n^",Next_Plot_to_Scan());
-			
+			    Scan_Res(Next_Plot_to_Scan(),'n');
+			}
+
 			uart_send_string(str);
-
 			Plot_Scan_Compl();
-
 			back_mm(180);
 
 			In_Path = false;

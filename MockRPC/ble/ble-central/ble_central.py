@@ -1,4 +1,5 @@
 import sys
+import time
 import asyncio
 import nest_asyncio
 from bleak import BleakClient
@@ -55,9 +56,11 @@ def test():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(a.connect_firebird())
-    while(1):
-        print(loop.run_until_complete(a.get_response()));
-    loop.run_until_complete(a.send("no-request".encode('utf-8')))
-    print(loop.run_until_complete(a.get_response()))
+    #while(1):
+    print(loop.run_until_complete(a.get_response()));
+    time.sleep(8);
+    #loop.run_until_complete(a.send("no-request".encode('utf-8')))
+    #print(loop.run_until_complete(a.get_response()))
     loop.run_until_complete(a.send("scan-9-56".encode('utf-8')))
-    print(loop.run_until_complete(a.get_response()))
+    while(1):
+        print(loop.run_until_complete(a.get_response()))

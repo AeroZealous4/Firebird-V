@@ -308,7 +308,8 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
     // Stop_Timer();        //Will stop after 2 sec completes
     Buzzer_state = true;    //Will be false after 2 secs
     buzzer_on();
-
+    // unsigned int case_no;
+    // case_no = Res_NoInjury * 4
     if(Is_Scan())
     {
         switch ( (Res_NoInjury<<2)|(Res_Major<<1)|Res_Minor ) 
@@ -322,7 +323,7 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
         case 2:
             sprintf(str_temp,"major-%d", Time_Completed() );
             break;  
-        case 3:
+        case 4:
             sprintf(str_temp,"no-%d", Time_Completed() );
             break; 
         default:

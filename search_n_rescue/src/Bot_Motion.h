@@ -22,6 +22,7 @@ AIM: APIs for controlling motion of bot
 
 // char str[] = "Hello, I am a Firebird-------- V\n";
 int Get_Curr_Node(void);
+void Set_Curr_Node(int temp); //S=Updates new node for curr node
 char Get_Curr_Head(void);
 
 void Update_Read(void); //Updates reading of WL sensor

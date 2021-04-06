@@ -22,6 +22,7 @@ int Next_Plot_to_Scan(void); //Returns -1 if scan is complete
 void Plot_Scan_Compl(void);	//
 
 //Put scan result in array
+//Scan result: 'M':Major Injury,'m':Minor Injury,'N':No enjury,'0':Not yet scanned
 void Scan_Res(int plot_nu,char inj);
 char Inj_at_Plot(int plot_nu);
 

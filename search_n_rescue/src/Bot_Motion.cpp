@@ -72,6 +72,12 @@ int Get_Curr_Node(void)
 {
 	return curr_node;
 }
+//Sets curr node to new value
+//Input: int
+void Set_Curr_Node(int temp)
+{
+	curr_node = temp;
+}
 
 /*
 *
