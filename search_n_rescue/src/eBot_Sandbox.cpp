@@ -179,6 +179,8 @@ bool Task_2B(void)
 		else if(Dest_Node == 66)	//Next_Plot_to_Scan()==17)//Goal reached
 		{
 			Plot_Scan_Compl();
+			sprintf(str,"Final Goal 66 reached^");
+			uart_send_string(str);
 			In_Path = false;
 			return true;
 		}
@@ -202,10 +204,10 @@ void Controller(void)
 
 	sprintf(str,"Command Update\n^");
 	uart_send_string(str);
-	// while (~Task_2B())
-	// {
-	// 	continue;
-	// }
+	while (Task_2B()==false)
+	{
+		continue;
+	}
 	sprintf(str,"Task2B complete\n^");
 	uart_send_string(str);
 	// Task_1B();		//Complete task related to 1B
