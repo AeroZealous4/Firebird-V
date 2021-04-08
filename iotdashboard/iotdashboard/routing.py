@@ -1,9 +1,4 @@
 from django.urls import path
-from channels.routing import ProtocolTypeRouter, URLRouter
 from . import consumers
 
-application = ProtocolTypeRouter({
-    "websocket": URLRouter([
-        path("ws/ticks/", consumers.TicksSyncConsumer),
-    ]),
-})
+websocket_url = [path("ws/ticks/<str:type>", consumers.TicksSyncConsumer.as_asgi()),]

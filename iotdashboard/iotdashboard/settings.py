@@ -138,7 +138,8 @@ REST_FRAMEWORK = {
 }
 
 
-TICKS_GROUP_NAME = "serverinitiate"
+SERVE_GROUP_NAME = "serverequest"
+TRACK_GROUP_NAME = "trackrobot"
 
 CHANNEL_LAYERS = {
     'default': {

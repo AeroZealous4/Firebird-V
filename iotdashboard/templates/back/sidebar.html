@@ -1,6 +1,6 @@
 <style type="text/css">
 
-	pre {outline: 3px solid #ccc; padding: 5px; margin: 2px; }
+	pre {outline: 3px solid #ccc; padding: 5px; margin: 2px; min-height: 15%}
 	.string { color: blue; }
 	.number { color: blue; }
 	.boolean { color: blue; }
@@ -9,8 +9,7 @@
 
 	.base-timer {
 	  position: relative;
-	  width: 35%;
-	  margin-top: -5%;
+	  width: 28%;
 	}
 
 	.base-timer__svg {
@@ -51,18 +50,18 @@
 
 	.base-timer__label {
 	  position: absolute;
-	  width: 98%;
+	  width: 99%;
 	  height: 100%;
 	  top: 0;
 	  display: flex;
 	  align-items: center;
 	  justify-content: center;
-	  font-size: 200%;
+	  font-size: 225%;
 	}
 
 	#loader {
-	  width: 55px;
-	  height: 55px;
+	  width: 62px;
+	  height: 62px;
 	  border: 5px solid #f3f3f3;
 	  border-radius: 50%;
 	  border-top: 5px solid #3498db;
@@ -101,29 +100,30 @@
 
 </style>
 
-<div class="col-md-3 sidebar">
-	<ul class="nav nav-sidebar" style="margin-top: -7%">
-        <li class="active">
-        	<a><b>Timer</b></a>
-        	<button type="button" class="btn btn-info" style="margin-top: 12%; margin-left: 2%; padding-top: 3%; " onclick="startTimer(); document.getElementById('action').innerHTML = 'Scanning Arena...'; document.getElementById('actionID').style.display = 'block'; document.getElementById('responseID').style.display = 'none';">Start</button>
-        	<button type="button" class="btn btn-danger" style="float: right; margin-top: 12%; margin-right: 2%; padding-top: 3%" onclick="onTimesUp();">Reset</button>
-        </li>
+<div class="col-md-4 sidebar">
+    <ul class="nav nav-sidebar" style="margin-top: -6%;">
+        <li class="active"><a><b>Thingsboard Server - Current Request</b></a></li>
     </ul>
-    <div id='timerID' style="height: 22%; margin-top: -32%" align="center"></div>
-    <ul class="nav nav-sidebar">
-        <li class="active" style="margin-top: -6%"><a><b>Thingsboard Server - Current Request</b></a></li>
-    </ul>
-    <pre id='requestID' style="background: white; margin-top: -2%"></pre>
+    <pre id='requestID' style="background: white; margin-top: -2%; margin-bottom: -2%"></pre>
     <br>
     <ul class="nav nav-sidebar">
         <li class="active"><a><b>Firebird Robot Response</b></a></li>
     </ul>
-    <div align="center">
-	    <pre id="actionID" style="background: white; padding: 0; display: none;">
-	    	<div id="loader" style="background: white;"></div><br><span id="action"></span>
+    <div align="center" style="margin-bottom: 5%">
+	    <pre id="actionID" style="background: white; padding: 0; display: none; margin-top: -2%; margin-bottom: -2%">
+	    	<div id="loader" style="background: white; margin: -2%"></div><br><span id="action"></span>
 	    </pre>
-	</div>
-    <pre id="responseID" style="background: white; display: block;"></pre>
+    	<pre id="responseID" style="background: white; display: block; text-align: left;"></pre>
+    </div>
+
+    <ul class="nav nav-sidebar">
+        <li class="active">
+        	<a><b>Timer</b></a>
+        	<button type="button" class="btn btn-info" style="margin-top: 9%; margin-left: 5%; padding: 2%" onclick="startTimer(); document.getElementById('action').innerHTML = 'Scanning Arena...'; document.getElementById('actionID').style.display = 'block'; document.getElementById('responseID').style.display = 'none';">START</button>
+        	<button type="button" class="btn btn-danger" style="float: right; margin-top: 9%; margin-right: 5%; padding: 2%" onclick="onTimesUp();">STOP</button>
+        </li>
+    </ul>
+    <div id='timerID' style="height: 20%; margin-top: -23%; margin-bottom: 1%" align="center"></div>
 </div>
 
 
@@ -159,8 +159,9 @@
 	response = JSON.stringify(response, undefined, 4);
 
 	// output(str);
-	output('requestID', syntaxHighlight(request));
-	output('responseID', syntaxHighlight(response));
+	output('requestID', syntaxHighlight('\n\nNo requests yet...\n\n\n'));
+	output('responseID', syntaxHighlight('\n\nWaiting to search and rescue...\n\n\n'));
+	output('action', 'Forwarding Request to Robot...');
 
 
 	// Credit: Mateusz Rybczonec
@@ -225,23 +226,25 @@
 	function onTimesUp() {
 	  clearInterval(timerInterval);
 	  timePassed = 0;
-	  document.getElementById("base-timer-label").innerHTML = formatTime(TIME_LIMIT);
 	  document.getElementById('actionID').style.display = 'none';
 	  document.getElementById('responseID').style.display = 'block';
 	}
 
 	function startTimer() {
-	  timerInterval = setInterval(() => {
-	    timePassed = timePassed += 1;
-	    timeLeft = TIME_LIMIT - timePassed;
-	    document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
-	    setCircleDasharray();
-	    setRemainingPathColor(timeLeft);
+		document.getElementById("base-timer-label").innerHTML = formatTime(TIME_LIMIT);
+		setRemainingPathColor(TIME_LIMIT);
+		setCircleDasharray();
+	  	timerInterval = setInterval(() => {
+		    timePassed = timePassed += 1;
+		    timeLeft = TIME_LIMIT - timePassed;
+		    document.getElementById("base-timer-label").innerHTML = formatTime(timeLeft);
+		    setCircleDasharray();
+		    setRemainingPathColor(timeLeft);
 
-	    if (timeLeft === 0) {
-	      onTimesUp();
-	    }
-	  }, 1000);
+		    if (timeLeft === 0) {
+		      onTimesUp();
+		    }
+		}, 1000);
 	}
 
 	function formatTime(time) {
@@ -271,6 +274,16 @@
 	    document
 	      .getElementById("base-timer-path-remaining")
 	      .classList.add(warning.color);
+	  } else if (timeLeft > warning.threshold) {
+	    document
+	      .getElementById("base-timer-path-remaining")
+	      .classList.remove(warning.color);
+	      document
+	      .getElementById("base-timer-path-remaining")
+	      .classList.remove(alert.color);
+	    document
+	      .getElementById("base-timer-path-remaining")
+	      .classList.add(info.color);
 	  }
 	}
 
@@ -290,11 +303,11 @@
 
 
 
-	var ws_url = 'ws://' + window.location.host + '/ws/ticks/';
+	var ws_url = 'ws://' + window.location.host + '/ws/ticks/serve';
     var ticksSocket = new WebSocket(ws_url);
 
     ticksSocket.onopen = function open() {
-      console.log('WebSockets connection created.');
+      console.log('WebSockets connection for server request created.');
     };
 
     if (ticksSocket.readyState == WebSocket.OPEN) {
@@ -316,13 +329,11 @@
 		    document.getElementById('responseID').style.display = "none";
 
 	        request = JSON.stringify(data["request"], undefined, 4);
-	        console.log('request', request);
 	        output('requestID', syntaxHighlight(request));
 	    }
 	    else if ("response" in data)
 	    {
 	    	response = JSON.stringify(data["response"], undefined, 4);
-	        console.log('response', response);
 	    	output('responseID', syntaxHighlight(response));
 	    	document.getElementById('actionID').style.display = "none";
 		    document.getElementById('responseID').style.display = "block";
@@ -330,16 +341,15 @@
 	    else if ("accept" in data)
 	    {
 	    	accept = JSON.stringify(data["accept"], undefined, 4);
-	        console.log('accept', accept);
 	    	output('responseID', 'Request Accepted.\nPerforming Request...');
 	        document.getElementById('actionID').style.display = "none";
 		    document.getElementById('responseID').style.display = "block";
 
-		    pausecomp(3000);
+		    pausecomp(4000);
 
-		    if ("fetch" in data['accept'])
+		    if ("fetch" in data)
 			    output('action', 'Fetching Nearest...');
-			else if ("scan" in data['accept'])
+			else if ("scan" in data)
 	    		output('action', 'Scanning Plot...');
 	    	else
 	    		output('action', 'Scanning Arena...');
