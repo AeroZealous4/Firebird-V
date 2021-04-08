@@ -4,7 +4,7 @@ from django.conf import settings
 import paho.mqtt.client as mqtt
 from . import connect_robot
 import channels.layers
-# import threading
+import threading
 import asyncio
 import time
 import json
@@ -12,8 +12,8 @@ import os
 
 
 thingsboard_url = 'thingsboard.e-yantra.org'
-ACCESS_TOKEN = 'pxvRs3iucxEGEU0R4ik5'
-DEVICE_ID = 'a9e821a0-8caf-11eb-950e-efef5c07c810'
+ACCESS_TOKEN = 'XfZjYAMMwnyGOe48B7YS'
+DEVICE_ID = '65e60a20-9773-11eb-950e-efef5c07c810'
 subscribe_topic = 'v1/devices/me/rpc/request/+'
 coapc = None
 ble_client = None
@@ -26,30 +26,44 @@ def on_connect(client, userdata, flags, rc):
 
     client.subscribe(subscribe_topic)
 
+    # threading.Thread(target=test_broadcast_track).start()
+
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    request = msg.payload
-    print(msg.topic + " " + str(msg.payload), "\n\n", json.loads(request))
+    request = json.loads(msg.payload)
+    print(msg.topic + " " + str(msg.payload), "\n\n", request)
 
     # Forward server request to Firebird
-    send_request(json.loads(request))
+    send_request(request)
 
     # Update web app with latest server request
-    broadcast_ticks({'request': json.loads(request)})
+    broadcast_serve({'request': request})
 
     rpc_id = os.path.split(msg.topic)[-1]
 
     # Fetch Firebird response
-    response = fetch_response(rpc_id, json.loads(request)["method"])
+    if request["method"] == "scan":
+        track_info = request["params"]["plot"]
+    elif request["method"] == "fetchNearest":
+        if "major" in request["params"]["type"]:
+            track_info = "red"
+        else:
+            track_info = "green"
+    else:
+        track_info = None
+
+    response = fetch_serve_response(request["params"]["id"], request["method"], track_info)
 
     # response = { 'result': 'ok' }
 
     # Forward Firebird response back to Server
-    coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
+    global coapc
+    coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
+    # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
 
-    broadcast_ticks({'response': response})
-    record_copy[request] = response
+    broadcast_serve({'response': response})
+    record_copy[msg.payload] = response
 
     # response = coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(payload))
     # print(response.code, '\n\n')
@@ -77,13 +91,10 @@ def send_request(request):
     else:
         esp_req_data = "no-request"
 
-    # loop = asyncio.get_event_loop()
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
     ble_client.loop.run_until_complete(ble_client.forward_request(esp_req_data.encode('utf-8')))
 
 
-def fetch_response(request_id, method_type):
+def fetch_serve_response(request_id, method_type, track_info):
 
     timeTaken = None
     # loop = asyncio.get_event_loop()
@@ -91,21 +102,23 @@ def fetch_response(request_id, method_type):
     # asyncio.set_event_loop(loop)
 
     robot_response = {"id": request_id}
-    esp_response = ble_client.loop.run_until_complete(ble_client.get_response())
+    esp_response = ble_client.loop.run_until_complete(ble_client.get_serve_response())
     esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
-    if "accepted" == esp_response:
-        broadcast_ticks({'accept': method_type})
-        esp_response = ble_client.loop.run_until_complete(ble_client.get_response())
+    while "accepted" == esp_response:
+        broadcast_serve({'accept': method_type})
+        esp_response = ble_client.loop.run_until_complete(ble_client.get_serve_response())
         esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
     if "major" in esp_response:
         robot_response["type"] = "majorInjury"
         timeTaken = esp_response.split('-')[-1]
+        broadcast_track({"scanned": {"color": "red", "plot": track_info}})
 
     elif "minor" in esp_response:
         robot_response["type"] = "minorInjury"
         timeTaken = esp_response.split('-')[-1]
+        broadcast_track({"scanned": {"color": "green", "plot": track_info}})
 
     elif "no" in esp_response:
         robot_response["type"] = "noInjury"
@@ -114,23 +127,38 @@ def fetch_response(request_id, method_type):
     elif "fetch" in esp_response:
         robot_response["plot"] = esp_response.split('-')[1]
         timeTaken = esp_response.split('-')[-1]
+        broadcast_track({"scanned": {"color": track_info, "plot": robot_response["plot"]}})
 
     else:
         robot_response["status"] = esp_response
         print(esp_response)
 
+
     if timeTaken is not None:
         robot_response["timeTaken"] = timeTaken
+
+    # time.sleep(6)
 
     return robot_response
 
 
-def broadcast_ticks(request):
+def broadcast_serve(request):
     channel_layer = channels.layers.get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        settings.TICKS_GROUP_NAME,
+        settings.SERVE_GROUP_NAME,
         {
-            "type": 'new_ticks',
+            "type": 'serve_request',
+            "content": json.dumps(request),
+        }
+    )
+
+
+def broadcast_track(request):
+    channel_layer = channels.layers.get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        settings.TRACK_GROUP_NAME,
+        {
+            "type": 'track_robot',
             "content": json.dumps(request),
         }
     )
@@ -158,10 +186,6 @@ def setup_ble():
     asyncio.set_event_loop(loop)
     loop.run_until_complete(ble_client.connect_firebird())
 
-    # ble_thread = threading.Thread(target=connect_robot.connect_firebird)
-    # ble_thread.start()
-    # connect_robot.connect_firebird()
-
 
 def connect_server(mqttc):
     setup_ble()
@@ -175,3 +199,31 @@ def disconnect_server(mqttc, coapc):
     coapc.stop()
     mqttc.loop_stop()
     mqttc.disconnect()
+
+
+def test_broadcast_track():
+    duration = 1.5
+
+    broadcast_track({"forward": {"current": 77, "dest": 77}})
+    time.sleep(duration)
+    broadcast_track({"forward": {"current": 77, "dest": 68}})
+    time.sleep(duration)
+    broadcast_track({"scanned": {"plot": 14, "color": "red"}})
+    time.sleep(duration)
+    broadcast_track({"rotate": {"current": 68, "face_dir": 'n', "rotate_dir": 'a'}})
+    time.sleep(duration)
+    broadcast_track({"scanned": {"plot": 15, "color": "green"}})
+    time.sleep(duration)
+    broadcast_track({"rotate": {"current": 68, "face_dir": 's', "rotate_dir": 'a'}})
+    time.sleep(duration)
+    broadcast_track({"forward": {"current": 68, "dest": 59}})
+    time.sleep(duration)
+    broadcast_track({"rotate": {"current": 59, "face_dir": 'n', "rotate_dir": 'r'}})
+    time.sleep(duration)
+    broadcast_track({"debris": {"current": 59, "dir": 'e'}})
+    time.sleep(duration)
+    broadcast_track({"rotate": {"current": 59, "face_dir": 'e', "rotate_dir": 'a'}})
+    time.sleep(duration)
+    broadcast_track({"forward": {"current": 59, "dest": 58}})
+    time.sleep(duration)
+    broadcast_track({"forward": {"current": 58, "dest": 57}})

@@ -35,6 +35,9 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6") 
 BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6") for tracking robot:
 ====================================
 
+## Separate Characteristics for notifying track info:
+	UUID: NOTIFY_TRACK_UUID = "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+
 (1) Debris Detection:
 		mesage format: "debris-<current_node>-<direction>"
 		constraints: 	(a) 1 <= current_node <= 81

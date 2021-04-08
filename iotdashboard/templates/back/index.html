@@ -10,13 +10,441 @@
 
 {% block content %}
 
-    <div style="position: relative; top: 0; left: 0">
+    <!-- <div style="position: relative; top: 0; left: 0">
         <img src="{% static "back/dashboard/img/arena.png" %}" style="position: relative; width: 100%; height: 480px">
         <img src="{% static "back/dashboard/img/robot.png" %}" style="position: absolute; z-index: 1; top: 87.3%; left: 40.5%; width: 5%; height: 10%">
-    </div>
+    </div> -->
+
+    <div id="arena" style="position: relative; top: 0; left: 5%; height: 74vh; margin-bottom: -6.5%"></div>
+
+    <button onclick="update();"> test </button>
+
+    <script src='{% static "back/svg.js/svg.js" %}'></script>
+
+    <script type="text/javascript">
+        var draw = SVG().addTo('#arena').size('100%', '100%');
+
+        // First Row
+        var node1 = draw.rect(10, 10).move(10, 0).fill('#000');
+        var node2 = draw.rect(10, 10).move(90, 0).fill('#000');
+        var node3 = draw.rect(10, 10).move(170, 0).fill('#000');
+        var node4 = draw.rect(10, 10).move(250, 0).fill('#000');
+        var node5 = draw.rect(10, 10).move(330, 0).fill('#000');
+        var node6 = draw.rect(10, 10).move(410, 0).fill('#000');
+        var node7 = draw.rect(10, 10).move(490, 0).fill('#000');
+        var node8 = draw.rect(10, 10).move(570, 0).fill('#000');
+        var node9 = draw.rect(10, 10).move(650, 0).fill('#000');
+
+        draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [640,0]]).fill('none').move(15, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        // Second Row
+        var node19 = draw.rect(10, 10).move(10, 100).fill('#000');
+        var node20 = draw.rect(10, 10).move(90, 100).fill('#000');
+        var node21 = draw.rect(10, 10).move(170, 100).fill('#000');
+        var node22 = draw.rect(10, 10).move(250, 100).fill('#000');
+        var node23 = draw.rect(10, 10).move(330, 100).fill('#000');
+        var node24 = draw.rect(10, 10).move(410, 100).fill('#000');
+        var node25 = draw.rect(10, 10).move(490, 100).fill('#000');
+        var node26 = draw.rect(10, 10).move(570, 100).fill('#000');
+        var node27 = draw.rect(10, 10).move(650, 100).fill('#000');
+
+        draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [640,0]]).fill('none').move(15, 105).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        // Third Row
+        var node37 = draw.rect(10, 10).move(10, 200).fill('#000');
+        var node38 = draw.rect(10, 10).move(90, 200).fill('#000');
+        var node39 = draw.rect(10, 10).move(170, 200).fill('#000');
+        var node40 = draw.rect(10, 10).move(250, 200).fill('#000');
+        var node41 = draw.rect(10, 10).move(330, 200).fill('#000');
+        var node42 = draw.rect(10, 10).move(410, 200).fill('#000');
+        var node43 = draw.rect(10, 10).move(490, 200).fill('#000');
+        var node44 = draw.rect(10, 10).move(570, 200).fill('#000');
+        var node45 = draw.rect(10, 10).move(650, 200).fill('#000');
+
+        draw.rect(40, 60).move(700, 175).fill('none').stroke({ color: '#000', width: 3});
+        draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [685,0]]).fill('none').move(15, 205).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        draw.line(13, 0, 37, 0).move(708, 205).stroke({ color: '#f06', width: 3, linecap: 'square' });
+        draw.line(0, 5, 0, 45).move(720, 185).stroke({ color: '#f06', width: 3, linecap: 'square' });
+        draw.text('Medical Camp').move(670, 105).font({ fill: '#f06', family: 'Inconsolata' }).rotate(270);
+
+
+        // Fourth Row
+        var node55 = draw.rect(10, 10).move(10, 300).fill('#000');
+        var node56 = draw.rect(10, 10).move(90, 300).fill('#000');
+        var node57 = draw.rect(10, 10).move(170, 300).fill('#000');
+        var node58 = draw.rect(10, 10).move(250, 300).fill('#000');
+        var node59 = draw.rect(10, 10).move(330, 300).fill('#000');
+        var node60 = draw.rect(10, 10).move(410, 300).fill('#000');
+        var node61 = draw.rect(10, 10).move(490, 300).fill('#000');
+        var node62 = draw.rect(10, 10).move(570, 300).fill('#000');
+        var node63 = draw.rect(10, 10).move(650, 300).fill('#000');
+
+        draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [640,0]]).fill('none').move(15, 305).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        // Fifth Row
+        var node73 = draw.rect(10, 10).move(10, 400).fill('#000');
+        var node74 = draw.rect(10, 10).move(90, 400).fill('#000');
+        var node75 = draw.rect(10, 10).move(170, 400).fill('#000');
+        var node76 = draw.rect(10, 10).move(250, 400).fill('#000');
+        var node77 = draw.rect(10, 10).move(330, 400).fill('#000');
+        var node78 = draw.rect(10, 10).move(410, 400).fill('#000');
+        var node79 = draw.rect(10, 10).move(490, 400).fill('#000');
+        var node80 = draw.rect(10, 10).move(570, 400).fill('#000');
+        var node81 = draw.rect(10, 10).move(650, 400).fill('#000');
+
+        draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [640,0]]).fill('none').move(15, 405).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+
+        // First column
+        draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(15, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        var node10 = draw.rect(10, 10).move(10, 50).fill('#000');
+        var node28 = draw.rect(10, 10).move(10, 150).fill('#000');
+        var node46 = draw.rect(10, 10).move(10, 250).fill('#000');
+        var node64 = draw.rect(10, 10).move(10, 350).fill('#000');
+
+        // Second column
+        draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(175, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        var node12 = draw.rect(10, 10).move(170, 50).fill('#000');
+        var node30 = draw.rect(10, 10).move(170, 150).fill('#000');
+        var node48 = draw.rect(10, 10).move(170, 250).fill('#000');
+        var node66 = draw.rect(10, 10).move(170, 350).fill('#000');
+
+        // Third column
+        var polyline_c3 = draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(335, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        var node14 = draw.rect(10, 10).move(330, 50).fill('#000');
+        var node32 = draw.rect(10, 10).move(330, 150).fill('#000');
+        var node50 = draw.rect(10, 10).move(330, 250).fill('#000');
+        var node68 = draw.rect(10, 10).move(330, 350).fill('#000');
+
+        draw.line(335, 405, 335, 460).stroke({ color: '#000', width: 3 });
+        draw.rect(40, 20).move(315, 445).fill('#000');
+        draw.text('Start').move(315, 465).font({ fill: '#f06', family: 'Inconsolata' });
+
+        // Fourth column
+        draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(495, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        var node16 = draw.rect(10, 10).move(490, 50).fill('#000');
+        var node34 = draw.rect(10, 10).move(490, 150).fill('#000');
+        var node52 = draw.rect(10, 10).move(490, 250).fill('#000');
+        var node70 = draw.rect(10, 10).move(490, 350).fill('#000');
+
+        // Fifth column
+        draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(655, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
+
+        var node18 = draw.rect(10, 10).move(650, 50).fill('#000');
+        var node36 = draw.rect(10, 10).move(650, 150).fill('#000');
+        var node54 = draw.rect(10, 10).move(650, 250).fill('#000');
+        var node72 = draw.rect(10, 10).move(650, 350).fill('#000');
+
+
+        var robotImg_n = draw.image('{% static "back/dashboard/img/robot-n.png" %}')
+        robotImg_n.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        var robotImg_e = draw.image('{% static "back/dashboard/img/robot-e.png" %}')
+        robotImg_e.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        var robotImg_w = draw.image('{% static "back/dashboard/img/robot-w.png" %}')
+        robotImg_w.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        var robotImg_s = draw.image('{% static "back/dashboard/img/robot-s.png" %}')
+        robotImg_s.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+
+        robotImg_n.hide();
+        robotImg_e.hide();
+        robotImg_w.hide();
+        robotImg_s.hide();
+
+
+        draw.image('{% static "back/dashboard/img/eyantra-logo.jpg" %}').size(120, 120).move(10, 395);
+        draw.image('{% static "back/dashboard/img/iitb-logo.jpg" %}').size(160, 160).move(510, 375);
+
+
+        // Inner Rectangles - Row 1
+
+        var plot1 = draw.rect(90, 50).move(50, 30).fill('none').stroke({ color: '#000'});
+        var plot1_sub = draw.rect(30, 15).move(80, 47).fill('none').stroke({ color: '#000'});
+
+        var plot2 = draw.rect(90, 50).move(210, 30).fill('none').stroke({ color: '#000'});
+        var plot2_sub = draw.rect(30, 15).move(240, 47).fill('none').stroke({ color: '#000'});
+
+        var plot3 = draw.rect(90, 50).move(370, 30).fill('none').stroke({ color: '#000'});
+        var plot3_sub = draw.rect(30, 15).move(400, 47).fill('none').stroke({ color: '#000'});
+
+        var plot4 = draw.rect(90, 50).move(530, 30).fill('none').stroke({ color: '#000'});
+        var plot4_sub = draw.rect(30, 15).move(560, 47).fill('none').stroke({ color: '#000'});
+
+        // Inner Rectangles - Row 2
+
+        var plot5 = draw.rect(90, 50).move(50, 130).fill('none').stroke({ color: '#000'});
+        var plot5_sub = draw.rect(30, 15).move(80, 147).fill('none').stroke({ color: '#000'});
+
+        var plot6 = draw.rect(90, 50).move(210, 130).fill('none').stroke({ color: '#000'});
+        var plot6_sub = draw.rect(30, 15).move(240, 147).fill('none').stroke({ color: '#000'});
+
+        var plot7 = draw.rect(90, 50).move(370, 130).fill('none').stroke({ color: '#000'});
+        var plot7_sub = draw.rect(30, 15).move(400, 147).fill('none').stroke({ color: '#000'});
+
+        var plot8 = draw.rect(90, 50).move(530, 130).fill('none').stroke({ color: '#000'});
+        var plot8_sub = draw.rect(30, 15).move(560, 147).fill('none').stroke({ color: '#000'});
+
+        // Inner Rectangles - Row 3
+
+        var plot9 = draw.rect(90, 50).move(50, 230).fill('none').stroke({ color: '#000'});
+        var plot9_sub = draw.rect(30, 15).move(80, 247).fill('none').stroke({ color: '#000'});
+
+        var plot10 = draw.rect(90, 50).move(210, 230).fill('none').stroke({ color: '#000'});
+        var plot10_sub = draw.rect(30, 15).move(240, 247).fill('none').stroke({ color: '#000'});
+
+        var plot11 = draw.rect(90, 50).move(370, 230).fill('none').stroke({ color: '#000'});
+        var plot11_sub = draw.rect(30, 15).move(400, 247).fill('none').stroke({ color: '#000'});
+
+        var plot12 = draw.rect(90, 50).move(530, 230).fill('none').stroke({ color: '#000'});
+        var plot12_sub = draw.rect(30, 15).move(560, 247).fill('none').stroke({ color: '#000'});
+
+        // Inner Rectangles - Row 4
+
+        var plot13 = draw.rect(90, 50).move(50, 330).fill('none').stroke({ color: '#000'});
+        var plot13_sub = draw.rect(30, 15).move(80, 347).fill('none').stroke({ color: '#000'});
+
+        var plot14 = draw.rect(90, 50).move(210, 330).fill('none').stroke({ color: '#000'});
+        var plot14_sub = draw.rect(30, 15).move(240, 347).fill('none').stroke({ color: '#000'});
+
+        var plot15 = draw.rect(90, 50).move(370, 330).fill('none').stroke({ color: '#000'});
+        var plot15_sub = draw.rect(30, 15).move(400, 347).fill('none').stroke({ color: '#000'});
+
+        var plot16 = draw.rect(90, 50).move(530, 330).fill('none').stroke({ color: '#000'});
+        var plot16_sub = draw.rect(30, 15).move(560, 347).fill('none').stroke({ color: '#000'});
+
+
+
+        //---------------- Track Robot -------------------------//
+
+        var robot_to_show = robotImg_n;
+        robot_to_show.show();
+
+        function pausecomp(millis)
+        {
+            var date = new Date();
+            var curDate = null;
+            do { 
+                curDate = new Date(); 
+            } while(curDate-date < millis);
+        }
+
+
+        // Debris
+        var vert_x = node1.x()-node19.x();
+        var vert_y = node1.y()-node19.y();
+        if (vert_x < 10 && vert_x > -10)
+            vert_x = 10;
+        else if (vert_x < 0)
+            vert_x = vert_x*-1;
+        if (vert_y < 5 && vert_y > -5)
+            vert_y = 10;
+        else if (vert_y < 0)
+            vert_y = vert_y*-1;
+
+        var hori_x = node1.x()-node3.x();
+        var hori_y = node1.y()-node3.y();
+        if (hori_x < 10 && hori_x > -10)
+            hori_x = 10;
+        else if (hori_x < 0)
+            hori_x = hori_x*-1;
+        if (hori_y < 5 && hori_y > -5)
+            hori_y = 10;
+        else if (hori_y < 0)
+            hori_y = hori_y*-1;
+
+
+        function update_minor_injury(plot) {
+            eval(plot).fill('#0f0');
+            eval(plot + "_sub").stroke({ color: 'none' });
+        }
+
+
+        function update_major_injury(plot) {
+            eval(plot).fill('#f00');
+            eval(plot + "_sub").stroke({ color: 'none' });
+        }
+
+
+        function set_debris(node_num, layout) {
+
+            var node = eval(node_num);
+
+            // vertical debris - move the debris w.r.t. "robot's current node - 5" if facing north. If facing south, then move debris w.r.t "robot's current node"
+            if (layout == "vertical")
+                draw.rect(vert_x, vert_y-10).move(node.x(), node.y()+10).fill('#fff').stroke({ color: '#000' });
+
+            // horizontal debris - move the debris w.r.t. "robot's current node - 1" if facing west. If facing east, then move debris w.r.t "robot's current node"
+            else if (layout == "horizontal")
+                draw.rect(hori_x-10, hori_y).move(node.x()+10, node.y()).fill('#fff').stroke({ color: '#000' });
+        }
+
+        
+        function forward_robot(current_num, dest_num) {
+
+            robotImg_n.untransform();
+            robotImg_e.untransform();
+            robotImg_w.untransform();
+            robotImg_s.untransform();
+
+            var dest_node = eval("node" + dest_num);
+            var current_node = eval("node" + current_num);
+
+            robot_to_show.animate(500, 500, 'now').center(current_node.x() + 5, current_node.y() + 5);
+            robot_to_show.animate(1000, 500, 'now').center(dest_node.x() + 5, dest_node.y() + 5);
+        }
+
+        function setRobotImg(face, turn, node) {
+            robotImg_n.untransform();
+            robotImg_e.untransform();
+            robotImg_w.untransform();
+            robotImg_s.untransform();
+
+            robotImg_n.hide();
+            robotImg_e.hide();
+            robotImg_w.hide();
+            robotImg_s.hide();
+
+            if (face == 'n')
+            {
+                if (turn == 'l')
+                    robot_to_show = robotImg_w;
+                else if (turn == 'r')
+                    robot_to_show = robotImg_e;
+                else if (turn == 'a')
+                    robot_to_show = robotImg_s;
+            }
+            else if (face == 's')
+            {
+                if (turn == 'l')
+                    robot_to_show = robotImg_e;
+                else if (turn == 'r')
+                    robot_to_show = robotImg_w;
+                else if (turn == 'a')
+                    robot_to_show = robotImg_n;
+            }
+            else if (face == 'e')
+            {
+                if (turn == 'l')
+                    robot_to_show = robotImg_n;
+                else if (turn == 'r')
+                    robot_to_show = robotImg_s;
+                else if (turn == 'a')
+                    robot_to_show = robotImg_w;
+            }
+            else if (face == 'w')
+            {
+                if (turn == 'l')
+                    robot_to_show = robotImg_s;
+                else if (turn == 'r')
+                    robot_to_show = robotImg_n;
+                else if (turn == 'a')
+                    robot_to_show = robotImg_e;
+            }
+
+            robot_to_show.center(node.x() + 5, node.y() + 5);
+            robot_to_show.show();
+            console.log({"inside callback": robot_to_show});
+        }
+
+
+        function rotate_robot(node_name, face_dir, rotate_dir) {
+            var node = eval(node_name);
+            var angle = 0;
+
+            robotImg_n.untransform();
+            robotImg_e.untransform();
+            robotImg_w.untransform();
+            robotImg_s.untransform();
+
+            if (rotate_dir == "l")
+            {
+                robot_to_show.center(node.x() + 5, node.y() + 5);
+                // robot_to_show.animate(500, 500).rotate(-90).after(function() {setRobotImg(face_dir, 'l', node)});
+                robot_to_show.animate(1, 0).rotate(-90).after(function() {setRobotImg(face_dir, 'l', node)});
+            }
+            else if (rotate_dir == "r")
+            {
+                robot_to_show.center(node.x() + 5, node.y() + 5);
+                // robot_to_show.animate(500, 500).rotate(90).after(function() {setRobotImg(face_dir, 'r', node)});
+                robot_to_show.animate(1, 0).rotate(90).after(function() {setRobotImg(face_dir, 'r', node)});
+            }
+            else if (rotate_dir == "a")
+            {
+                robot_to_show.center(node.x() + 5, node.y() + 5);
+                robot_to_show.animate(500, 500).rotate(180).after(function() {setRobotImg(face_dir, 'a', node)});
+                // robot_to_show.animate(1, 0).rotate(180).after(function() {setRobotImg(face_dir, 'a', node)});
+            }
+        }
+
+
+
+        var track_ws_url = 'ws://' + window.location.host + '/ws/ticks/track';
+        var trackSocket = new WebSocket(track_ws_url);
+
+        trackSocket.onopen = function track_open() {
+          console.log('WebSockets connection for robot tracking created.');
+        };
+
+        trackSocket.onclose = function track_close() {
+          console.log('WebSockets connection for robot tracking closed.');
+        };
+
+        if (trackSocket.readyState == WebSocket.OPEN) {
+          trackSocket.onopen();
+        }
+
+        if (trackSocket.readyState == WebSocket.CLOSE) {
+          trackSocket.onclose();
+        }
+
+        trackSocket.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            console.log('data', data);
+
+            if ("debris" in data)
+            {
+                var nodeName = "node";
+                var node_num = parseInt(data["debris"]["current"]);
+                var robot_dir = data["debris"]["dir"];
+                if (robot_dir == 'n')
+                    set_debris(nodeName + (node_num - 5), "vertical")
+                else if (robot_dir == 's')
+                    set_debris(nodeName + node_num, "vertical")
+                else if (robot_dir == 'e')
+                    set_debris(nodeName + node_num, "horizontal")
+                else if (robot_dir == 'w')
+                    set_debris(nodeName + (node_num - 1), "horizontal")
+            }
+            else if ("scanned" in data)
+            {
+                if (data["scanned"]["color"] == "red")
+                    update_major_injury("plot" + data["scanned"]["plot"]);
+                else if (data["scanned"]["color"] == "green")
+                    update_minor_injury("plot" + data["scanned"]["plot"]);
+            }
+            else if ("forward" in data)
+                forward_robot(parseInt(data["forward"]["current"]), parseInt(data["forward"]["dest"]));
+            else if ("rotate" in data)
+                rotate_robot("node" + data["rotate"]["current"], data["rotate"]["face_dir"], data["rotate"]["rotate_dir"]);
+        };
+
+        function update() {
+            update_minor_injury("plot11");
+            update_minor_injury("plot15");
+            update_major_injury("plot1");
+            update_major_injury("plot10");
+
+
+            set_debris("node1", "vertical");
+            set_debris("node7", "vertical");
+            set_debris("node43", "horizontal");
+            set_debris("node73", "horizontal");
+        }
+
+    </script>
 
 {% endblock %}
-
-<script type="text/javascript">
-    
-</script>
