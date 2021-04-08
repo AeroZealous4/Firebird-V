@@ -26,4 +26,10 @@ void Plot_Scan_Compl(void);	//
 void Scan_Res(int plot_nu,char inj);
 char Inj_at_Plot(int plot_nu);
 
+//Get distance will have to travel to reached to node which will fulfil given request
+int Get_Dist(void);
+//Returns closest plot number and node for given fetch request/ 'M':major,'m':Minor,'N':No Injury
+int Fetch_plot_no_req(char Inj,int curr_node); //Returns -1 if not plot number available
+//Call after Fetch_plot_no_req() and only if non -1 data is received from it
+int Fetch_plot_node_req(void);//Returns final node which needs to be gone to for fetch req,
 #endif /* EBOT_SANDBOX_H_ */

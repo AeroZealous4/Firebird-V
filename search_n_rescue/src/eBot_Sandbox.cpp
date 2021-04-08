@@ -11,10 +11,12 @@
 #include "eBot_Sandbox.h"
 #include <stdio.h>
 
+#define DEBUG_SAND 1	//Comment if debug msgs are not required
 // //------------------------------ GLOBAL VARIABLES -------------------------------
 
-char str[] = "Hello, I am a Firebird-------- V\n";
-
+char str[] = "Hello, I am a Firebird--------------------------------------------- V\n";
+//Min Vel from going to one node to other node i.e. No_nodes/Sec
+float Vel_N_N = 0.2; //Tune it
 /**
  * @brief Initializes all peripherals reuired for project
  */
@@ -110,17 +112,88 @@ bool Ent_Cmd(void)
 			sprintf(str,"Req to scan Plot Nu:%d\n^",Scan_Plot_No());
 			uart_send_string(str);
 			Req_Plot_No = Scan_Plot_No();
+
+			if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
+			{
+				#ifdef DEBUG_SAND
+                    sprintf(str,"Cmd Accptd:Time: %d < %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                    uart_send_string(str);
+                #endif
+				Cmd_Accepted(); //Send ack that cmd is accepted
+			}
+			else{
+				
+				#ifdef DEBUG_SAND
+                    sprintf(str,"Cmd Rejected: It will not compl in time^");
+                    uart_send_string(str);
+                #endif
+
+				Cmd_Ignore();
+				return false;
+			}
+			
 		}					
 		else if( Is_Major() )
-			;
+		{
+			Req_Plot_No = Fetch_plot_no_req('M',Get_Curr_Node());
+
+			if( Req_Plot_No == -1)
+			{
+				Cmd_Ignore();
+				return false;
+			}				
+			else
+			{	
+				if( (int) Get_Dist()/Vel_N_N < Complete_In() )
+				{
+					Dest_Node = Fetch_plot_node_req();
+					Cmd_Accepted(); //Send ack that cmd is accepted
+				}
+				else{
+				
+					#ifdef DEBUG_SAND
+						sprintf(str,"Cmd Rejected: It will not compl in time^");
+						uart_send_string(str);
+					#endif
+				Cmd_Ignore();
+				return false;
+				}				
+			}
+		}
 		else if( Is_Minor() )
-			;
+		{
+			Req_Plot_No = Fetch_plot_no_req('m',Get_Curr_Node());
 
-		Cmd_Accepted(); //Send ack that cmd is accepted
+			if( Req_Plot_No == -1)
+			{
+				Cmd_Ignore();
+				return false;
+			}	
+			else
+			{	
 
-		sprintf(str,"Scan dikstra, Dest node:%d\n^",Dest_Node);
-		uart_send_string(str);
+				if( (int) Get_Dist()/Vel_N_N < Complete_In() )
+				{
+					Dest_Node = Fetch_plot_node_req();
+					Cmd_Accepted(); //Send ack that cmd is accepted
+				}
+				else{
+				
+					#ifdef DEBUG_SAND
+						sprintf(str,"Cmd Rejected: it will not compl in time^");
+						uart_send_string(str);
+					#endif
+				Cmd_Ignore();
+				return false;
+				}
 
+			}
+		}
+
+		#ifdef DEBUG_SAND
+			sprintf(str,"Scan dikstra, Dest node:%d\n^",Dest_Node);
+			uart_send_string(str);
+		#endif
 		dijkstra(Dest_Node);	//Updates path to travel to Dest node
 
 
@@ -130,9 +203,15 @@ bool Ent_Cmd(void)
 		{
 			Nxt_Node = Next_Node(Get_Curr_Node());
 
-			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
-			uart_send_string(str);
+			#ifdef DEBUG_SAND
+				sprintf(str,"Moving to node:%d\n^",Nxt_Node);
+				uart_send_string(str);
+			#endif
+
+			
+			// rotate_comm(Get_Curr_Node(),Get_Curr_Head(),rot_dir);
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
+			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
@@ -161,6 +240,8 @@ bool Ent_Cmd(void)
 				sprintf(str,"Plot no: %d with Major Injury\n^",Req_Plot_No);
 				Scan_Res(Req_Plot_No,'M');
 				Set_Major();
+
+				// scanned_comm(Req_Plot_No,'M');
 			}				
 			else if(Type_Inj == 'G')
 			{
@@ -215,8 +296,10 @@ bool Task_2B(void)
 			
 			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Get_Curr_Node());
 
-			sprintf(str,"Before dikstra, Dest node:%d\n^",Dest_Node);
-			uart_send_string(str);
+			#ifdef DEBUG_SAND
+				sprintf(str,"Before dikstra, Dest node:%d\n^",Dest_Node);
+				uart_send_string(str);
+			#endif
 
 			dijkstra(Dest_Node);	//Updates path to travel to Dest node
 			In_Path = true;
@@ -241,8 +324,11 @@ bool Task_2B(void)
 
 		if( Get_Curr_Node() != Dest_Node )	//Goes to next node
 		{
+			#ifdef DEBUG_SAND
 			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
 			uart_send_string(str);
+			#endif
+			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);
@@ -272,11 +358,13 @@ bool Task_2B(void)
 			{
 				sprintf(str,"Plot no: %d with Major Injury\n^",Next_Plot_to_Scan());
 				Scan_Res(Next_Plot_to_Scan(),'M');
+				scanned_comm(Next_Plot_to_Scan(),'M');
 			}				
 			else if(Type_Inj == 'G')
 			{
                 sprintf(str,"Plot no: %d with Minor Injury\n^",Next_Plot_to_Scan());
 			    Scan_Res(Next_Plot_to_Scan(),'m');
+				scanned_comm(Next_Plot_to_Scan(),'m');	//Send scaned data to esp
 			}
 			else
 			{

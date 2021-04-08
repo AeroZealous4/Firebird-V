@@ -482,14 +482,14 @@ void turn_head(char Head)
 				switch(H)
 				{
 					case 'E':
-							  right_turn_wls();
+							right_turn_wls();
 								break;
 					case 'S':
 							right_degrees(90); //Left turn by 90Degreesright_turn_wls();
 							right_turn_wls();
 							  break;
 					case 'W':
-						left_turn_wls();
+							left_turn_wls();
 							  break;
 				}
 				break;

@@ -9,7 +9,7 @@
 #include <avr/interrupt.h>		// Standard AVR Interrupt Library
 #include "firebird_avr.h"		// Header file included that contains macro definitions essential for Firebird V robot
 
-#define DEBUG_COMM 1 
+// #define DEBUG_COMM 1 
 
 #define delay_uart 100 //Uart not working if delay is not provided , Tune for optimal performance
 
@@ -169,7 +169,7 @@ void Update_Command(void) //Updates any command received from ESP32
                 #ifdef DEBUG_COMM
                     sprintf(str_temp,"M-");
                     uart_send_string(str_temp);
-                #endif
+                #endif  
 
                 _delay_ms(delay_uart);
                 ch_msg = uart3_readByte();
@@ -262,12 +262,12 @@ int Complete_In(void)  //Returns complete in time for command received
 //Call one of the following after reception of command
 void Cmd_Accepted(void) //Sends ack to ESP32 indicating acceptance of cmd
 {
-    sprintf(str_temp,"accepted");
+    sprintf(str_temp,"accepted^");
     uart_send_string(str_temp);
 }
 void Cmd_Ignore(void) //Sends msg to ESP32 i.e. Cmd is rejected/flushed and will not be executed
 {
-    sprintf(str_temp,"ignore");
+    sprintf(str_temp,"ignore^");
     uart_send_string(str_temp);   
     Stop_Timer();
 }
@@ -315,19 +315,19 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
         switch ( (Res_NoInjury<<2)|(Res_Major<<1)|Res_Minor ) 
         {
         case 0:
-            sprintf(str_temp,"Error in task completion");
+            sprintf(str_temp,"Error in task completion^");
             break;
         case 1:
-            sprintf(str_temp,"minor-%d", Time_Completed() );
+            sprintf(str_temp,"minor-%d^", Time_Completed() );
             break;   
         case 2:
-            sprintf(str_temp,"major-%d", Time_Completed() );
+            sprintf(str_temp,"major-%d^", Time_Completed() );
             break;  
         case 4:
-            sprintf(str_temp,"no-%d", Time_Completed() );
+            sprintf(str_temp,"no-%d^", Time_Completed() );
             break; 
         default:
-            sprintf(str_temp,"Scan-Error");
+            sprintf(str_temp,"Scan-Error^");
             break;
         }
     }
@@ -339,6 +339,38 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
     uart_send_string(str_temp);
 } 
 
+//## Separate Characteristics for notifying track info:
+//	UUID: NOTIFY_TRACK_UUID = "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+
+//Send a scanned info to esp32 which will be displayed on GUI
+//inj: 'M','m', No injury not need to be reported
+void scanned_comm(int plot_num, char inj)
+{
+    char Inj_Str[20];
+
+    if(inj == 'M')
+        strcpy(Inj_Str, "red");
+    else if(inj == 'm')
+        strcpy(Inj_Str, "green");
+    else
+        return;
+
+    sprintf(str_temp,"scanned-%d-%s^",plot_num,Inj_Str);  
+    uart_send_string(str_temp); 
+}
+
+//"forward-<current_node>-<destination_node>"
+void forward_comm(int curr_node,int dest_node)
+{
+    sprintf(str_temp,"forward-%d-%d^",curr_node,dest_node);  
+    uart_send_string(str_temp); 
+}
+//"rotate-<current_node>-<facing_direction>-<rotation_direction>"
+void rotate_comm(int curr_node,char face_dir,char rot_dir)
+{
+    sprintf(str_temp,"rotate-%d-%c-%c^",curr_node,face_dir,rot_dir);  
+    uart_send_string(str_temp); 
+}
 //---------------------------------- FUNCTIONS ----------------------------------------------------------
 
 //-----------------------------CONFIGURATION FUNCTIONS --------------------------------------------------

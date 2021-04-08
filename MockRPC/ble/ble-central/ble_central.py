@@ -56,11 +56,15 @@ def test():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(a.connect_firebird())
-    #while(1):
+    i=0;
+    #while(i<100):
+    #   i = i+1;
+    #   print(loop.run_until_complete(a.get_response()));
     print(loop.run_until_complete(a.get_response()));
     time.sleep(8);
     #loop.run_until_complete(a.send("no-request".encode('utf-8')))
     #print(loop.run_until_complete(a.get_response()))
-    loop.run_until_complete(a.send("scan-9-56".encode('utf-8')))
+    #loop.run_until_complete(a.send("scan-9-57".encode('utf-8')))
+    loop.run_until_complete(a.send("fetch-minor-40".encode('utf-8')))
     while(1):
         print(loop.run_until_complete(a.get_response()))

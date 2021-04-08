@@ -112,16 +112,100 @@ int Plot_Node_No[18][4] =
 //Direction for moving in center of plot 
 char Plot_Node_Dir[4] = {'E','S','W','N'};//i.e. if 0th indx of Plot_Node_No is choosen then 
 										  //Turn to E direction
-int Plot_Node_Dir_Index = 0;
+int Plot_Node_Dir_Index = 0;	//Indicates dir to which bot should rotate for getting towards centre
 //Scanning plot sequence
 int Plot_Seq[17] = {13,9,5,1,2,6,10,14,15,11,7,3,4,8,12,16,17};
 //Scan result: 'M':Major Injury,'m':Minor Injury,'N':No enjury,'0':Not yet scanned
 char Plot_Inj[18] = {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
 int Next_Plot_to_Scan_Indx = 12;
+int Dist_To_Compl_Req = 10000;
+
+//Returns closest plot number and node for given fetch request
+int Fetch_plot_no = 0,Fetch_plot_node = 0 ; 
+int M_idx=0,m_idx=0,No_idx=0;
+int Major_Plots[18],Minor_Plots[18],No_Plots[18];
+
+int Fetch_plot_no_req(char Inj,int curr_node)
+{
+	int temp_res=-1,temp_Dist=3000,temp_plot;
+	dijkstra(curr_node);
+	int location=0,i ,j;
+	int temp = 3000;
+	if(Inj == 'M')
+	{
+		temp_plot = -1;
+		location = Plot_Node_No[Major_Plots[0]][0];
+
+		for(j = 0; j < M_idx; j++)
+			for(i = 0; i < 4; i++)
+				if (dist[ Plot_Node_No[Major_Plots[j]][i] ] < temp && dist[ Plot_Node_No[Major_Plots[j]][i] ] < 47483647)// && Node_Mask[])
+				{
+					temp_plot = Major_Plots[j];
+					location = Plot_Node_No[Major_Plots[j]][i];
+					temp = dist[ Plot_Node_No[Major_Plots[j]][i] ] ;
+					Plot_Node_Dir_Index = i;
+				}
+		temp_res = temp_plot;
+		temp_Dist = temp;
+	}
+	else if(Inj == 'm')
+	{
+		temp_plot = -1;
+		location = Plot_Node_No[Minor_Plots[0]][0];
+
+		for(j = 0; j < M_idx; j++)
+			for(i = 0; i < 4; i++)
+				if (dist[ Plot_Node_No[Minor_Plots[j]][i] ] < temp && dist[ Plot_Node_No[Minor_Plots[j]][i] ] < 47483647)// && Node_Mask[])
+				{
+					temp_plot = Minor_Plots[j];
+					location = Plot_Node_No[Minor_Plots[j]][i];
+					temp = dist[ Plot_Node_No[Minor_Plots[j]][i] ] ;
+					Plot_Node_Dir_Index = i;
+				}
+		temp_res = temp_plot;
+		temp_Dist = temp;
+	}
+	else if(Inj == 'N')
+	{
+		temp_plot = -1;
+		location = Plot_Node_No[No_Plots[0]][0];
+
+		for(j = 0; j < M_idx; j++)
+			for(i = 0; i < 4; i++)
+				if (dist[ Plot_Node_No[No_Plots[j]][i] ] < temp && dist[ Plot_Node_No[No_Plots[j]][i] ] < 47483647)// && Node_Mask[])
+				{
+					temp_plot = No_Plots[j];
+					location = Plot_Node_No[No_Plots[j]][i];
+					temp = dist[ Plot_Node_No[No_Plots[j]][i] ] ;
+					Plot_Node_Dir_Index = i;
+				}
+		temp_res = temp_plot;
+		temp_Dist = temp;		
+	}
+
+	Dist_To_Compl_Req = temp_Dist;
+	Fetch_plot_node = location;
+	return temp_res;
+}
+//Call after Fetch_plot_no_req() and only if non -1 data is received from it
+int Fetch_plot_node_req(void)//Returns final node which needs to be gone to for fetch req,
+{
+	return Fetch_plot_node ;
+}
+
 void Scan_Res(int plot_nu,char inj)
 {
 	if(plot_nu<17 && plot_nu > 0)
+	{
 		Plot_Inj[plot_nu] = inj;
+
+		if(inj == 'M' && M_idx < 18)
+			Major_Plots[M_idx++] = plot_nu;
+		else if(inj == 'm' && m_idx< 18)
+			Minor_Plots[m_idx++] = plot_nu;
+		else if(inj == 'N' && No_idx < 18)
+			No_Plots[No_idx++] = plot_nu;
+	}
 }
 char Inj_at_Plot(int plot_nu)
 {
@@ -157,7 +241,14 @@ int Min_Dist_Node_Fr_Plot(int plot_no,int curr_node)
                 temp = dist[Plot_Node_No[plot_no][i]];
 				Plot_Node_Dir_Index = i;
             }
+
+	Dist_To_Compl_Req = temp;
     return location;
+}
+//Get distance will have to travel to reached to node which will fulfil given request
+int Get_Dist(void)
+{
+	return Dist_To_Compl_Req;
 }
 //Returns next node in way of destination
 int Next_Node(int curr_node)
