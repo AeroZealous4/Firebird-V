@@ -106,7 +106,7 @@ void Update_Command(void) //Updates any command received from ESP32
     // String d = "";
     // int flag = 0;
 
-    char ch_msg = uart3_readByte();
+    unsigned char ch_msg = uart3_readByte();
 
     if(ch_msg!= -1)
     {

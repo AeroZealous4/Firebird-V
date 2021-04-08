@@ -117,7 +117,7 @@ int Plot_Node_Dir_Index = 0;	//Indicates dir to which bot should rotate for gett
 int Plot_Seq[17] = {13,9,5,1,2,6,10,14,15,11,7,3,4,8,12,16,17};
 //Scan result: 'M':Major Injury,'m':Minor Injury,'N':No enjury,'0':Not yet scanned
 char Plot_Inj[18] = {'0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'};
-int Next_Plot_to_Scan_Indx = 12;
+int Next_Plot_to_Scan_Indx = 0;//12;
 int Dist_To_Compl_Req = 10000;
 
 //Returns closest plot number and node for given fetch request

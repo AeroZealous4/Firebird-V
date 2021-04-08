@@ -116,7 +116,7 @@ bool Ent_Cmd(void)
 			if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 			{
 				#ifdef DEBUG_SAND
-                    sprintf(str,"Cmd Accptd:Time: %d < %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                    sprintf(str,"Cmd Accptd:Time: %d > %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
                     uart_send_string(str);
                 #endif
 				Cmd_Accepted(); //Send ack that cmd is accepted
@@ -124,12 +124,12 @@ bool Ent_Cmd(void)
 			else{
 				
 				#ifdef DEBUG_SAND
-                    sprintf(str,"Cmd Rejected: It will not compl in time^");
+                    sprintf(str,"Cmd Rejected:Time to comp: %d, In: %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
                     uart_send_string(str);
                 #endif
 
 				Cmd_Ignore();
-				return false;
+				return true;//false;
 			}
 			
 		}					
@@ -140,11 +140,11 @@ bool Ent_Cmd(void)
 			if( Req_Plot_No == -1)
 			{
 				Cmd_Ignore();
-				return false;
+				return true;//false;
 			}				
 			else
 			{	
-				if( (int) Get_Dist()/Vel_N_N < Complete_In() )
+				if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 				{
 					Dest_Node = Fetch_plot_node_req();
 					Cmd_Accepted(); //Send ack that cmd is accepted
@@ -152,11 +152,11 @@ bool Ent_Cmd(void)
 				else{
 				
 					#ifdef DEBUG_SAND
-						sprintf(str,"Cmd Rejected: It will not compl in time^");
-						uart_send_string(str);
+						sprintf(str,"Cmd Rejected:Time to comp: %d, In: %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                   		uart_send_string(str);
 					#endif
 				Cmd_Ignore();
-				return false;
+				return true;//false;
 				}				
 			}
 		}
@@ -167,12 +167,12 @@ bool Ent_Cmd(void)
 			if( Req_Plot_No == -1)
 			{
 				Cmd_Ignore();
-				return false;
+				return true;//false;
 			}	
 			else
 			{	
 
-				if( (int) Get_Dist()/Vel_N_N < Complete_In() )
+				if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 				{
 					Dest_Node = Fetch_plot_node_req();
 					Cmd_Accepted(); //Send ack that cmd is accepted
@@ -180,11 +180,11 @@ bool Ent_Cmd(void)
 				else{
 				
 					#ifdef DEBUG_SAND
-						sprintf(str,"Cmd Rejected: it will not compl in time^");
-						uart_send_string(str);
+						sprintf(str,"Cmd Rejected:Time to comp: %d, In: %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                   		uart_send_string(str);
 					#endif
 				Cmd_Ignore();
-				return false;
+				return true;//false;
 				}
 
 			}
