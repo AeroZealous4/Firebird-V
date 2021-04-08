@@ -18,9 +18,10 @@
 #define LED 2
 #define BUTTON 0
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+// #define SERVICE_UUID1 "4fafc202-1fb5-459e-8fcc-c5c9c331914b"
 #define LED_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BUTTON_CHARACTERISTIC_UUID "8801f158-f55e-4550-95f6-d260381b99e7"
-#define NOTIFY_TRACK_UUID "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+#define TRACK_CHARACTERISTIC_UUID "beb5483f-36e1-4688-b7f5-ea07361b26a8"
 
 #define RXD2 16
 #define TXD2 17
@@ -31,7 +32,7 @@ unsigned char led_toggle = 0;
 
 BLECharacteristic *ledCharacteristic;
 BLECharacteristic *buttonCharacteristic;
-BLECharacteristic *TrackCharacteristic;
+BLECharacteristic *trackCharacteristic;
 
 bool deviceConnected = false;
 volatile int buttonState = HIGH;
@@ -70,6 +71,11 @@ class ControlSwitch: public BLECharacteristicCallbacks {
       int res1 =  strcmp(token,cmd_1);
       int res2 =  strcmp(token,cmd_2);
 
+      Serial.printf("Sending back: accept\n");
+      buttonCharacteristic->setValue("accepted");
+      buttonCharacteristic->notify();
+
+
       Serial.printf("'%s'\n",token);
       if(res1 == 0) 
       {
@@ -101,7 +107,6 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                
                 sprintf(str_msg,"S%c%c",(unsigned char) switchState1,(unsigned char)  CompleteIn);
                 Serial2.write(str_msg);
-                Serial.write(str_msg);
                 // Sec = millis()/1000;
               }
             }
@@ -134,7 +139,6 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                   Serial.printf("majorInjury\n");
                   sprintf(str_msg,"FM%c",(unsigned int) CompleteIn);
                   Serial2.write(str_msg);
-                  Serial.write(str_msg);
                   // Serial2.write('1');
                   // Sec = millis()/1000;
                 }
@@ -144,7 +148,6 @@ class ControlSwitch: public BLECharacteristicCallbacks {
                   Serial.printf("minorInjury\n");
                   sprintf(str_msg,"Fm%c",(unsigned int) CompleteIn);
                   Serial2.write(str_msg);
-                  Serial.write(str_msg);
                   // Sec = millis()/1000;
                 }
             }
@@ -186,6 +189,82 @@ class ControlSwitch: public BLECharacteristicCallbacks {
         digitalWrite(LED, HIGH);
         led_toggle = 1;
       }
+
+      buttonCharacteristic->setValue("minor-25");
+      buttonCharacteristic->notify();
+      Serial.printf("Sending back scan reply\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("forward-77-77");
+      trackCharacteristic->notify();
+      Serial.printf("Sending forward-77-77\n");
+
+      delay(500);
+      
+      trackCharacteristic->setValue("forward-77-68");
+      trackCharacteristic->notify();
+      Serial.printf("Sending forward-77-68\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("scanned-14-red");
+      trackCharacteristic->notify();
+      Serial.printf("Sending scanned-14-red\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("rotate-68-n-a");
+      trackCharacteristic->notify();
+      Serial.printf("Sending rotate-68-n-a\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("scanned-15-green");
+      trackCharacteristic->notify();
+      Serial.printf("Sending scanned-15-green\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("rotate-68-s-a");
+      trackCharacteristic->notify();
+      Serial.printf("Sending rotate-68-s-a\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("forward-68-59");
+      trackCharacteristic->notify();
+      Serial.printf("Sending forward-68-59\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("rotate-59-n-r");
+      trackCharacteristic->notify();
+      Serial.printf("Sending rotate-59-n-r\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("debris-59-e");
+      trackCharacteristic->notify();
+      Serial.printf("Sending debris-59-e\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("rotate-59-e-a");
+      trackCharacteristic->notify();
+      Serial.printf("Sending rotate-59-e-a\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("forward-59-58");
+      trackCharacteristic->notify();
+      Serial.printf("Sending forward-59-58\n");
+
+      delay(500);
+
+      trackCharacteristic->setValue("forward-58-57");
+      trackCharacteristic->notify();
+      Serial.printf("Sending forward-58-57\n");
     }
 };
 
@@ -228,29 +307,26 @@ void setup() {
                         );
   // client charactersitic descriptor: required for notify
   buttonCharacteristic->addDescriptor(new BLE2902());
-  // lightSwitchService->start();
 
-
-  TrackCharacteristic = lightSwitchService->createCharacteristic(
-                          NOTIFY_TRACK_UUID,
+  // BLEService *lightSwitchService1 = pServer->createService(SERVICE_UUID1);
+  trackCharacteristic = lightSwitchService->createCharacteristic(
+                          TRACK_CHARACTERISTIC_UUID,
                           BLECharacteristic::PROPERTY_NOTIFY
                         );
   // client charactersitic descriptor: required for notify
-  TrackCharacteristic->addDescriptor(new BLE2902());
+  trackCharacteristic->addDescriptor(new BLE2902());
 
   lightSwitchService->start();
+  // lightSwitchService1->start();
 
   // off initially
   ledCharacteristic->setValue("0");
   buttonCharacteristic->setValue("0");
-  TrackCharacteristic->setValue("0");
-
-  char testStr[] ="Request accepted";
-  TrackCharacteristic->setValue(testStr);
-  TrackCharacteristic->notify();
+  trackCharacteristic->setValue("0");
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
+  // pAdvertising->addServiceUUID(SERVICE_UUID1);
   pAdvertising->setScanResponse(false);
   // pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
@@ -266,10 +342,10 @@ void loop() {
   String d = "";
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
-  while(Serial2.available())
+  while(Serial.available())
   {
     
-    ch_msg =char (Serial2.read());
+    ch_msg =char (Serial.read());
     Serial.print(ch_msg);
 
   // //1 Using special character from Robot to ESP 32
@@ -298,17 +374,6 @@ void loop() {
   //   }
   //   else 
   //   {
-
-    if(ch_msg=='^')
-    {
-      flag = 1;
-      break;
-    }
-    else if(ch_msg == '!')
-    {
-      flag = 2;
-      break;
-    }
         d += ch_msg;
         testStr[index++] = ch_msg;
         flag = 1;
@@ -317,22 +382,13 @@ void loop() {
 
   }
 
-  if(flag==1)
+  if(flag)
   {
     d += '\0';//NULL;
     testStr[index] = '\0';//NULL;
       // buttonCharacteristic->setValue(d.c_str());
       buttonCharacteristic->setValue(testStr);
       buttonCharacteristic->notify();
-    flag = 0;
-  }
-  else if(flag==2)
-  {
-    d += '\0';//NULL;
-    testStr[index] = '\0';//NULL;
-    // buttonCharacteristic->setValue(d.c_str());
-    TrackCharacteristic->setValue(testStr);
-    TrackCharacteristic->notify();
     flag = 0;
   }
   // else

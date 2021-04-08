@@ -12,34 +12,62 @@ class TicksSyncConsumer(AsyncConsumer):
 
 
     async def websocket_connect(self, event):
-        await self.send({
-            'type': 'websocket.accept'
-        })
 
-        # Join ticks group
-        await self.channel_layer.group_add(
-            settings.TICKS_GROUP_NAME,
-            self.channel_name
-        )
+        subscribe_type = self.scope['url_route']['kwargs']['type']
 
-        if self.mqttc is None:
-            nest_asyncio.apply()
-            self.mqttc = connect_thingsboard.setup_mqtt()
-            self.coapc = connect_thingsboard.setup_coap()
-            connect_thingsboard.connect_server(self.mqttc)
+        if subscribe_type == "serve":
+            await self.send({
+                'type': 'websocket.accept'
+            })
+
+            # Join serve group
+            await self.channel_layer.group_add(
+                settings.SERVE_GROUP_NAME,
+                self.channel_name
+            )
+
+            if self.mqttc is None:
+                nest_asyncio.apply()
+                self.mqttc = connect_thingsboard.setup_mqtt()
+                self.coapc = connect_thingsboard.setup_coap()
+                connect_thingsboard.connect_server(self.mqttc)
+
+        elif subscribe_type == "track":
+            await self.send({
+                'type': 'websocket.accept'
+            })
+
+            # Join track group
+            await self.channel_layer.group_add(
+                settings.TRACK_GROUP_NAME,
+                self.channel_name
+            )            
 
 
     async def websocket_disconnect(self, event):
-        # Leave ticks group
+        # Leave serve group
         await self.channel_layer.group_discard(
-            settings.TICKS_GROUP_NAME,
+            settings.SERVE_GROUP_NAME,
+            self.channel_name
+        )
+
+        # Leave track group
+        await self.channel_layer.group_discard(
+            settings.TRACK_GROUP_NAME,
             self.channel_name
         )
 
         connect_thingsboard.disconnect_server(self.mqttc, self.coapc)
 
 
-    async def new_ticks(self, event):
+    async def serve_request(self, event):
+        await self.send({
+            'type': 'websocket.send',
+            'text': event['content'],
+        })
+
+
+    async def track_robot(self, event):
         await self.send({
             'type': 'websocket.send',
             'text': event['content'],
