@@ -28,3 +28,10 @@ BLE communication from ESP32 to Laptop (ESP32 BLE Address: "84:CC:A8:5F:90:D6")
 
 			(c-6) "ignore" : If robot decides to ignore requested task then this string will be sent
 (2) LED on ESP32: It will toggle each time new request is received from laptop to ESP32
+
+(3)
+#define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define LED_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"  //For sending cmds to robot
+#define BUTTON_CHARACTERISTIC_UUID "8801f158-f55e-4550-95f6-d260381b99e7"   //For receiving response of command from robot
+#define NOTIFY_TRACK_UUID "beb5483f-36e1-4688-b7f5-ea07361b26a8"    //Tracking data from robot
+#define NOTIFY_DEBUG_UUID "beb5483a-36e1-4688-b7f5-ea07361b26a8"    //Debug data from robot

@@ -356,20 +356,20 @@ void scanned_comm(int plot_num, char inj)
     else
         return;
 
-    sprintf(str_temp,"scanned-%d-%s^",plot_num,Inj_Str);  
+    sprintf(str_temp,"scanned-%d-%s!",plot_num,Inj_Str);  
     uart_send_string(str_temp); 
 }
 
 //"forward-<current_node>-<destination_node>"
 void forward_comm(int curr_node,int dest_node)
 {
-    sprintf(str_temp,"forward-%d-%d^",curr_node,dest_node);  
+    sprintf(str_temp,"forward-%d-%d!",curr_node,dest_node);  
     uart_send_string(str_temp); 
 }
 //"rotate-<current_node>-<facing_direction>-<rotation_direction>"
 void rotate_comm(int curr_node,char face_dir,char rot_dir)
 {
-    sprintf(str_temp,"rotate-%d-%c-%c^",curr_node,face_dir,rot_dir);  
+    sprintf(str_temp,"rotate-%d-%c-%c!",curr_node,face_dir,rot_dir);  
     uart_send_string(str_temp); 
 }
 //---------------------------------- FUNCTIONS ----------------------------------------------------------
