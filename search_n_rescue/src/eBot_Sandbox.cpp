@@ -120,7 +120,7 @@ bool Ent_Cmd(void)
 			if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 			{
 				#ifdef DEBUG_SAND
-                    sprintf(str,"Cmd Accptd:Time: %d > %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                    sprintf(str,"Cmd Accptd:Time: %d > %d$",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
                     uart_send_string(str);
                 #endif
 				Cmd_Accepted(); //Send ack that cmd is accepted
@@ -128,7 +128,7 @@ bool Ent_Cmd(void)
 			else{
 				
 				#ifdef DEBUG_SAND
-                    sprintf(str,"Cmd Rejected:Time to comp: %d, In: %d^",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
+                    sprintf(str,"Cmd Rejected:Time to comp: %d, In: %d$",(int) ( Get_Dist()/Vel_N_N ),Complete_In() );
                     uart_send_string(str);
                 #endif
 
@@ -217,7 +217,7 @@ bool Ent_Cmd(void)
 			
 			// rotate_comm(Get_Curr_Node(),Get_Curr_Head(),rot_dir);
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
-			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
+			// forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
@@ -354,16 +354,36 @@ bool Task_2B(void)
 			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
 			uart_send_string(str);
 			#endif
-			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
+			// forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_wls(1);	//Move to next node
-			Set_Curr_Node(Nxt_Node);
+
+			// if(Is_Debris())
+			// {
+			// 	sprintf(str,"Debris Detected: %d to %d$",Get_Curr_Node(),Nxt_Node);
+			// 	uart_send_string(str);
+
+			// 	if( Get_Curr_Head()== 'E')
+			// 		turn_head( 'W' );
+			// 	else if( Get_Curr_Head()== 'S')
+			// 		turn_head( 'N' );
+			// 	else if( Get_Curr_Head()== 'W')
+			// 		turn_head( 'E' );
+			// 	else if( Get_Curr_Head()== 'N')
+			// 		turn_head( 'S' );
+
+			// 	forward_wls(1);	//Move to next node
+
+			// 	Adj_Update(Get_Curr_Node(), Nxt_Node, Dest_Node);				
+			// }
+			// else
+				Set_Curr_Node(Nxt_Node);
 
 			In_Path = true;
 			
 			#ifdef DEBUG_SAND
-			sprintf(str,"Reached node:%d\n^",Nxt_Node);
-			uart_send_string(str);
+				sprintf(str,"Reached node:%d\n$",Nxt_Node);
+				uart_send_string(str);
 			#endif
 		}
 		else if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
@@ -405,7 +425,7 @@ bool Task_2B(void)
 			else
 			{
 				#ifdef DEBUG_SAND
-					sprintf(str,"Plot no: %d with No Injury\n^",Next_Plot_to_Scan());
+					sprintf(str,"Plot no: %d with No Injury\n$",Next_Plot_to_Scan());
 					Scan_Res(Next_Plot_to_Scan(),'n');
 				#endif
 			}
@@ -418,7 +438,7 @@ bool Task_2B(void)
 			In_Path = false;
 
 			#ifdef DEBUG_SAND
-				sprintf(str,"Plot scan compl^");
+				sprintf(str,"Plot scan compl$");
 				uart_send_string(str);
 			#endif
 		}
@@ -427,7 +447,7 @@ bool Task_2B(void)
 			Plot_Scan_Compl();
 
 			#ifdef DEBUG_SAND
-				sprintf(str,"Final Goal 66 reached^");
+				sprintf(str,"Final Goal 66 reached$");
 				uart_send_string(str);
 			#endif
 			In_Path = false;
@@ -445,16 +465,20 @@ void Controller(void)
 	// int return_code;
 
 	init_all_peripherals();
+	// while(1)
+	// {
+	// 	forward_comm(0,61);//Sends current node status to esp32
+	// }
 	calibrate();
 	#ifdef DEBUG_SAND
-		sprintf(str,"Cal Done\n^");
+		sprintf(str,"Cal Done\n$");
 		uart_send_string(str);
 	#endif
 
 	Update_Command();
 
 	#ifdef DEBUG_SAND
-		sprintf(str,"Command Update\n^");
+		sprintf(str,"Command Update\n$");
 		uart_send_string(str);
 	#endif
 	while (Task_2B()==false)
@@ -462,7 +486,7 @@ void Controller(void)
 		continue;
 	}
 	#ifdef DEBUG_SAND
-		sprintf(str,"Task2B complete\n^");
+		sprintf(str,"Task2B complete\n$");
 		uart_send_string(str);
 	#endif
 	// Task_1B();		//Complete task related to 1B

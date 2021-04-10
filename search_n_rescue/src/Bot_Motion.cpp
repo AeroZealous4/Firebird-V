@@ -383,21 +383,36 @@ void forward_wls1(unsigned char node)
 	forward_mm(95);
    stop();
 }
-
+bool Debris_flag = false;
 void forward_wls(unsigned char node)
 {
+	
 	forward ();
 	for (int i = 0; i < node; i++)
 	{
 		while(1)
 		{
+			// int debris_det = 0;
+			
 			PID();
 			// if(center_wl_sensor_data > wl_sen_th && (left_wl_sensor_data > wl_sen_th || right_wl_sensor_data > wl_sen_th))
 			if(center_wl_sensor_data > wl_sen_th_cal && (left_wl_sensor_data > wl_sen_th_cal || right_wl_sensor_data > wl_sen_th_cal))
 				{
 					stop();
+					Debris_flag = false;
 					break; //Next node reached
 				}
+			// else if( (center_wl_sensor_data < wl_sen_th_l_cal) && (left_wl_sensor_data < wl_sen_th_l_cal ) && (right_wl_sensor_data < wl_sen_th_l_cal) )
+			// {
+			// 	if(debris_det++ >= 1)
+			// 	{
+			// 		stop();
+			// 		Debris_flag = true;
+			// 		break; //Debris Detected
+			// 	}
+			// }
+			// else
+			// debris_det = 0;
 		}
 		velocity(Cruise_Vel,Cruise_Vel);
 		forward_mm(95);
@@ -405,6 +420,20 @@ void forward_wls(unsigned char node)
 	
 }
 
+bool Is_Debris(void)
+{
+    if(Debris_flag)
+    {
+
+        #ifdef DEBUG
+            sprintf(str_temp,"Debris Detected$");
+            uart_send_string(str_temp);
+        #endif 
+        Debris_flag = false;
+        return true;
+    }
+    return false;
+}
 /*
 *
 * Function Name: left_turn_wls

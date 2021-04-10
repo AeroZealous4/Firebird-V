@@ -405,7 +405,7 @@ void dijkstra(int src)
 // Output: None
 // Description: Fn takes undirected edge which is cut off due to obstacle and removes it 
 //				from Adj matrix of graph and updates new shortest path i.e. parent vector
-void Adj_Update(int i, int j)
+void Adj_Update(int i, int j, int Dest_Node)
 {
 	if( j < 50 && i< 50 && j>=0 && i>=0)
 	{
@@ -418,7 +418,7 @@ void Adj_Update(int i, int j)
 			graph[j][Next_Node(j)] = 0;
 		}
 
-		dijkstra(dest);
+		dijkstra(Dest_Node);
 	}	
 } 
 

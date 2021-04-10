@@ -268,8 +268,8 @@ void setup() {
   Serial.println("Characteristic defined! Now you can read it in your phone!");
 }
 
-int tem =500;
-int flag =0;
+int tem = 500;
+int flag = 0;
 char ch_msg;
 
 void loop() {
@@ -277,10 +277,33 @@ void loop() {
   int index = 0;
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
+  unsigned long time = millis();
+  unsigned long delay_var = 3700;
+
+  char Fwd_Trac[] = "forward-60-59";
+  char scan_Trac[] = "scanned-5-green";
+
+  // while(1)
+  // {
+  //   if(millis() > (time+delay ) )
+  //   {
+  //     Serial.print(Fwd_Trac);
+  //     TrackCharacteristic->setValue(Fwd_Trac);
+  //     TrackCharacteristic->notify();
+
+  //     // Serial.print(scan_Trac);
+  //     // TrackCharacteristic->setValue(scan_Trac);
+  //     // TrackCharacteristic->notify();
+
+  //     time = millis();
+  //   }
+
+  // }
   while(Serial2.available())
   {
     
     ch_msg =char (Serial2.read());
+    Serial.print(ch_msg);
 
     if(ch_msg=='^')
     {
@@ -299,9 +322,9 @@ void loop() {
     }
 
         testStr[index++] = ch_msg;
-        flag = 1;
+        flag = 3;
 
-      delay(1); //To enable reading of entrire string
+      delay(2); //To enable reading of entrire string
 
   }
 

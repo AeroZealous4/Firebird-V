@@ -7,7 +7,7 @@
 
 int minDistance(int dist[],bool sptSet[]);
 void dijkstra(int Dest);			//Put dest node there
-void Adj_Update(int i, int j);	//i is current node and j is mid node which is not reachable 
+void Adj_Update(int i, int j, int dest_node);	//i is current node and j is mid node which is not reachable 
 char Next_Dir(int i, int j);//i is current node and j is ddesired node
 int Next_Node(int curr_node);	//Takes value of current node and returns next node to which robot should move.
 int Min_Dist_Node_Fr_Plot(int plot_no,int curr_node);//Returns node number to which u should go for respective plot

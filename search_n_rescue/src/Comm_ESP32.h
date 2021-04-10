@@ -49,5 +49,5 @@ void scanned_comm(int plot_num, char inj);
 void forward_comm(int curr_node,int dest_node);
 //"rotate-<current_node>-<facing_direction>-<rotation_direction>"
 void rotate_comm(int curr_node,char face_dir,char rot_dir);
-
+void debris_comm(int curr_node,char dir);
 #endif

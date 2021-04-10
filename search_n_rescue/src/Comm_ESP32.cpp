@@ -372,6 +372,12 @@ void rotate_comm(int curr_node,char face_dir,char rot_dir)
     sprintf(str_temp,"rotate-%d-%c-%c!",curr_node,face_dir,rot_dir);  
     uart_send_string(str_temp); 
 }
+//"debris-<current_node>-<direction>"
+void debris_comm(int curr_node,char dir)
+{
+    sprintf(str_temp,"debris-%d-%c!",curr_node,dir);  
+    uart_send_string(str_temp); 
+}
 //---------------------------------- FUNCTIONS ----------------------------------------------------------
 
 //-----------------------------CONFIGURATION FUNCTIONS --------------------------------------------------
