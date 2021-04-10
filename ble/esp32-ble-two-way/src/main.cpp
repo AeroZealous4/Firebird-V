@@ -245,9 +245,9 @@ void setup() {
   buttonCharacteristic->setValue("0");
   TrackCharacteristic->setValue("0");
 
-  char testStr[] ="Request accepted";
-  TrackCharacteristic->setValue(testStr);
-  TrackCharacteristic->notify();
+  // char testStr[] ="Request accepted";
+  // TrackCharacteristic->setValue(testStr);
+  // TrackCharacteristic->notify();
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
@@ -270,7 +270,7 @@ void loop() {
   {
     
     ch_msg =char (Serial2.read());
-    Serial.print(ch_msg);
+    // Serial.print(ch_msg);
 
   // //1 Using special character from Robot to ESP 32
   //   if(ch_msg == '!') //Request Accepted i.e. ack from bot 
@@ -321,6 +321,8 @@ void loop() {
   {
     d += '\0';//NULL;
     testStr[index] = '\0';//NULL;
+    Serial.print("\nTo Ble:");
+    Serial.print(testStr);
       // buttonCharacteristic->setValue(d.c_str());
       buttonCharacteristic->setValue(testStr);
       buttonCharacteristic->notify();
@@ -330,6 +332,8 @@ void loop() {
   {
     d += '\0';//NULL;
     testStr[index] = '\0';//NULL;
+    Serial.print("\nTo Ble:");
+    Serial.print(testStr);
     // buttonCharacteristic->setValue(d.c_str());
     TrackCharacteristic->setValue(testStr);
     TrackCharacteristic->notify();

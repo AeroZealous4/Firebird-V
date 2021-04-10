@@ -31,7 +31,7 @@ bool Buzzer_state = false;
 int Buzzer_Time = 0;
 
 
-char str_temp[] = "Hello, I am a Firebird-------- V\n";
+char str_temp[] = "Hello, I am a Firebird--------------- V\n";
 
 volatile unsigned int count_ms = 0;	// Used in ISR of Timer2 to store ms elasped
 unsigned int count_seconds = 0;			// Stores seconds elasped
@@ -264,6 +264,7 @@ void Cmd_Accepted(void) //Sends ack to ESP32 indicating acceptance of cmd
 {
     sprintf(str_temp,"accepted^");
     uart_send_string(str_temp);
+    
 }
 void Cmd_Ignore(void) //Sends msg to ESP32 i.e. Cmd is rejected/flushed and will not be executed
 {
@@ -332,9 +333,9 @@ void Task_Complete(void)   //Sends msg to ESP32 about conveying completion of la
         }
     }
     else if(Is_Major() || Is_Minor())
-        sprintf(str_temp,"fetch-%d-%d",Plot_number_fetch,Time_Completed() );
+        sprintf(str_temp,"fetch-%d-%d^",Plot_number_fetch,Time_Completed() );
     else
-        sprintf(str_temp,"Error decoding task");
+        sprintf(str_temp,"Error decoding task^");
 
     uart_send_string(str_temp);
 } 

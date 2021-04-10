@@ -11,12 +11,12 @@
 #include "eBot_Sandbox.h"
 #include <stdio.h>
 
-#define DEBUG_SAND 1	//Comment if debug msgs are not required
+// #define DEBUG_SAND 1	//Comment if debug msgs are not required
 // //------------------------------ GLOBAL VARIABLES -------------------------------
 
 char str[] = "Hello, I am a Firebird--------------------------------------------- V\n";
 //Min Vel from going to one node to other node i.e. No_nodes/Sec
-float Vel_N_N = 0.2; //Tune it
+float Vel_N_N = 0.27; //Tune it
 /**
  * @brief Initializes all peripherals reuired for project
  */
@@ -44,6 +44,7 @@ void init_all_peripherals(void)
 void Task_1B(void)
 {
 	forward_wls(1); //Goes to next node
+	
 	sprintf(str,"1st Node\n^");
 	uart_send_string(str);
 	forward_wls(1); //Goes to next node i.e. Mid point of required node
@@ -102,15 +103,18 @@ bool Ent_Cmd(void)
 
 	if(Is_Command())
 	{
-
+		#ifdef DEBUG_SAND
 		sprintf(str,"Command Received^");
 		uart_send_string(str);
+		#endif
 
 		if( Is_Scan() )
 		{
 			Dest_Node = Min_Dist_Node_Fr_Plot( Scan_Plot_No(),Get_Curr_Node());
+			#ifdef DEBUG_SAND
 			sprintf(str,"Req to scan Plot Nu:%d\n^",Scan_Plot_No());
 			uart_send_string(str);
+			#endif
 			Req_Plot_No = Scan_Plot_No();
 
 			if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
@@ -147,6 +151,7 @@ bool Ent_Cmd(void)
 				if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 				{
 					Dest_Node = Fetch_plot_node_req();
+					Set_Plot_Number(Req_Plot_No); 
 					Cmd_Accepted(); //Send ack that cmd is accepted
 				}
 				else{
@@ -175,6 +180,7 @@ bool Ent_Cmd(void)
 				if( (int) (Get_Dist()/Vel_N_N) < Complete_In() )
 				{
 					Dest_Node = Fetch_plot_node_req();
+					Set_Plot_Number(Req_Plot_No); 
 					Cmd_Accepted(); //Send ack that cmd is accepted
 				}
 				else{
@@ -215,19 +221,24 @@ bool Ent_Cmd(void)
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
+			#ifdef DEBUG_SAND
 			sprintf(str,"Reached node:%d\n^",Nxt_Node);
 			uart_send_string(str);
+			#endif
 		}
 		
 		if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
 		{
+			#ifdef DEBUG_SAND
 			sprintf(str,"Plot nu %d reached\n^",Req_Plot_No);
 			uart_send_string(str);
-
+			#endif
 			turn_head_to_plot(Get_Dir_Plot());
 
+			#ifdef DEBUG_SAND
 			sprintf(str,"Rotation finished\n^");
 			uart_send_string(str);
+			#endif
 
 			forward_mm(180);
 				// sprintf(str,"Center of block no: %d reached\n^",Next_Plot_to_Scan());
@@ -237,7 +248,9 @@ bool Ent_Cmd(void)
 
 			if(Type_Inj == 'R')
 			{
+				#ifdef DEBUG_SAND
 				sprintf(str,"Plot no: %d with Major Injury\n^",Req_Plot_No);
+				#endif
 				Scan_Res(Req_Plot_No,'M');
 				Set_Major();
 
@@ -245,22 +258,31 @@ bool Ent_Cmd(void)
 			}				
 			else if(Type_Inj == 'G')
 			{
+				#ifdef DEBUG_SAND
 				sprintf(str,"Plot no: %d with Minor Injury\n^",Req_Plot_No);
+				#endif
 				Scan_Res(Req_Plot_No,'m');
 				Set_Minor();
 			}				
 			else
 			{
+				#ifdef DEBUG_SAND
 				sprintf(str,"Plot no: %d with No Injury\n^",Req_Plot_No);
+				#endif
 				Scan_Res(Req_Plot_No,'N');
 				Set_NoInjury(); 
-			}			
-			uart_send_string(str);
+				
+			}	
+			#ifdef DEBUG_SAND		
+				uart_send_string(str);
+			#endif
 
 			Task_Complete(); //Req Full filled
 			back_mm(180);
+			#ifdef DEBUG_SAND
 			sprintf(str,"Plot scan compl^");
 			uart_send_string(str);
+			#endif
 		}
 
 		return true;
@@ -304,16 +326,20 @@ bool Task_2B(void)
 			dijkstra(Dest_Node);	//Updates path to travel to Dest node
 			In_Path = true;
 
+			#ifdef DEBUG_SAND
 			sprintf(str,"Des Plot Nu:%d\n^",Next_Plot_to_Scan());
 			uart_send_string(str);
+			#endif
 		}
 		else
 		{
 			Plot_Scan_Compl(); //Current plot is already scanned
 			In_Path = false;
 
+			#ifdef DEBUG_SAND
 			sprintf(str,"Plot Scan Complete\n^");
 			uart_send_string(str);
+			#endif
 		}
 		
 	}
@@ -334,19 +360,25 @@ bool Task_2B(void)
 			Set_Curr_Node(Nxt_Node);
 
 			In_Path = true;
-
+			
+			#ifdef DEBUG_SAND
 			sprintf(str,"Reached node:%d\n^",Nxt_Node);
 			uart_send_string(str);
+			#endif
 		}
 		else if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
 		{
+			#ifdef DEBUG_SAND
 			sprintf(str,"Plot nu %d reached\n^",Next_Plot_to_Scan());
 			uart_send_string(str);
+			#endif
 
 			turn_head_to_plot(Get_Dir_Plot());
 
+			#ifdef DEBUG_SAND
 			sprintf(str,"Rotation finished\n^");
 			uart_send_string(str);
+			#endif
 
 			forward_mm(180);
 				// sprintf(str,"Center of block no: %d reached\n^",Next_Plot_to_Scan());
@@ -356,36 +388,48 @@ bool Task_2B(void)
 
 			if(Type_Inj == 'R')
 			{
+				#ifdef DEBUG_SAND
 				sprintf(str,"Plot no: %d with Major Injury\n^",Next_Plot_to_Scan());
+				#endif
 				Scan_Res(Next_Plot_to_Scan(),'M');
 				scanned_comm(Next_Plot_to_Scan(),'M');
 			}				
 			else if(Type_Inj == 'G')
 			{
+				#ifdef DEBUG_SAND
                 sprintf(str,"Plot no: %d with Minor Injury\n^",Next_Plot_to_Scan());
+				#endif
 			    Scan_Res(Next_Plot_to_Scan(),'m');
 				scanned_comm(Next_Plot_to_Scan(),'m');	//Send scaned data to esp
 			}
 			else
 			{
-				sprintf(str,"Plot no: %d with No Injury\n^",Next_Plot_to_Scan());
-			    Scan_Res(Next_Plot_to_Scan(),'n');
+				#ifdef DEBUG_SAND
+					sprintf(str,"Plot no: %d with No Injury\n^",Next_Plot_to_Scan());
+					Scan_Res(Next_Plot_to_Scan(),'n');
+				#endif
 			}
-
-			uart_send_string(str);
+			#ifdef DEBUG_SAND
+				uart_send_string(str);
+			#endif
 			Plot_Scan_Compl();
 			back_mm(180);
 
 			In_Path = false;
 
-			sprintf(str,"Plot scan compl^");
-			uart_send_string(str);
+			#ifdef DEBUG_SAND
+				sprintf(str,"Plot scan compl^");
+				uart_send_string(str);
+			#endif
 		}
 		else if(Dest_Node == 66)	//Next_Plot_to_Scan()==17)//Goal reached
 		{
 			Plot_Scan_Compl();
-			sprintf(str,"Final Goal 66 reached^");
-			uart_send_string(str);
+
+			#ifdef DEBUG_SAND
+				sprintf(str,"Final Goal 66 reached^");
+				uart_send_string(str);
+			#endif
 			In_Path = false;
 			return true;
 		}
@@ -402,19 +446,25 @@ void Controller(void)
 
 	init_all_peripherals();
 	calibrate();
-	sprintf(str,"Cal Done\n^");
-	uart_send_string(str);
+	#ifdef DEBUG_SAND
+		sprintf(str,"Cal Done\n^");
+		uart_send_string(str);
+	#endif
 
 	Update_Command();
 
-	sprintf(str,"Command Update\n^");
-	uart_send_string(str);
+	#ifdef DEBUG_SAND
+		sprintf(str,"Command Update\n^");
+		uart_send_string(str);
+	#endif
 	while (Task_2B()==false)
 	{
 		continue;
 	}
-	sprintf(str,"Task2B complete\n^");
-	uart_send_string(str);
+	#ifdef DEBUG_SAND
+		sprintf(str,"Task2B complete\n^");
+		uart_send_string(str);
+	#endif
 	// Task_1B();		//Complete task related to 1B
 	// int i=1; 
 	while (1)

@@ -12,8 +12,10 @@ import os
 
 
 thingsboard_url = 'thingsboard.e-yantra.org'
-ACCESS_TOKEN = 'XfZjYAMMwnyGOe48B7YS'
-DEVICE_ID = '65e60a20-9773-11eb-950e-efef5c07c810'
+ACCESS_TOKEN = 'TcFcRiMFf7WFxHh1TmBS'
+#XfZjYAMMwnyGOe48B7YS'
+DEVICE_ID = 'bfedd360-9906-11eb-950e-efef5c07c810'
+#65e60a20-9773-11eb-950e-efef5c07c810'
 subscribe_topic = 'v1/devices/me/rpc/request/+'
 coapc = None
 ble_client = None

@@ -123,7 +123,7 @@ int Dist_To_Compl_Req = 10000;
 //Returns closest plot number and node for given fetch request
 int Fetch_plot_no = 0,Fetch_plot_node = 0 ; 
 int M_idx=0,m_idx=0,No_idx=0;
-int Major_Plots[18],Minor_Plots[18],No_Plots[18];
+int Major_Plots[20],Minor_Plots[20],No_Plots[20];
 
 int Fetch_plot_no_req(char Inj,int curr_node)
 {
@@ -135,6 +135,9 @@ int Fetch_plot_no_req(char Inj,int curr_node)
 	{
 		temp_plot = -1;
 		location = Plot_Node_No[Major_Plots[0]][0];
+
+		if(M_idx <= 0)
+			return -1;
 
 		for(j = 0; j < M_idx; j++)
 			for(i = 0; i < 4; i++)
@@ -153,7 +156,10 @@ int Fetch_plot_no_req(char Inj,int curr_node)
 		temp_plot = -1;
 		location = Plot_Node_No[Minor_Plots[0]][0];
 
-		for(j = 0; j < M_idx; j++)
+		if(m_idx <= 0)
+			return -1;
+
+		for(j = 0; j < m_idx; j++)
 			for(i = 0; i < 4; i++)
 				if (dist[ Plot_Node_No[Minor_Plots[j]][i] ] < temp && dist[ Plot_Node_No[Minor_Plots[j]][i] ] < 47483647)// && Node_Mask[])
 				{
@@ -170,7 +176,10 @@ int Fetch_plot_no_req(char Inj,int curr_node)
 		temp_plot = -1;
 		location = Plot_Node_No[No_Plots[0]][0];
 
-		for(j = 0; j < M_idx; j++)
+		if(No_idx <= 0)
+			return -1;
+
+		for(j = 0; j < No_idx; j++)
 			for(i = 0; i < 4; i++)
 				if (dist[ Plot_Node_No[No_Plots[j]][i] ] < temp && dist[ Plot_Node_No[No_Plots[j]][i] ] < 47483647)// && Node_Mask[])
 				{
