@@ -165,8 +165,8 @@ def test_one(client):
     asyncio.set_event_loop(loop)
     loop.run_until_complete(client.connect_firebird(loop))
 
-    # threading.Thread(target=broadcast_track, args=(client, )).start()
-    broadcast_track(client)
+    threading.Thread(target=broadcast_track, args=(client, )).start()
+    # broadcast_track(client)
 
     # while True:
     #     loop.run_until_complete(client.get_debug_response())

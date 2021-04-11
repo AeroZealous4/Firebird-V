@@ -1,8 +1,10 @@
 from django.conf import settings
 from asgiref.sync import async_to_sync
 from channels.consumer import AsyncConsumer
-from . import connect_thingsboard
+# from . import connect_thingsboard
+from . import ble_central
 import nest_asyncio
+import threading
 
 
 class TicksSyncConsumer(AsyncConsumer):
@@ -28,9 +30,11 @@ class TicksSyncConsumer(AsyncConsumer):
 
             if self.mqttc is None:
                 nest_asyncio.apply()
-                self.mqttc = connect_thingsboard.setup_mqtt()
-                self.coapc = connect_thingsboard.setup_coap()
-                connect_thingsboard.connect_server(self.mqttc)
+                # self.mqttc = connect_thingsboard.setup_mqtt()
+                # self.coapc = connect_thingsboard.setup_coap()
+                # connect_thingsboard.connect_server(self.mqttc)
+                self.mqttc = True
+                threading.Thread(target=ble_central.start_iot).start()
 
         elif subscribe_type == "track":
             await self.send({
@@ -57,7 +61,8 @@ class TicksSyncConsumer(AsyncConsumer):
             self.channel_name
         )
 
-        connect_thingsboard.disconnect_server(self.mqttc, self.coapc)
+        # connect_thingsboard.disconnect_server(self.mqttc, self.coapc)
+        ble_central.disconnect_server()
 
 
     async def serve_request(self, event):
