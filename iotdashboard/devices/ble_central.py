@@ -62,15 +62,6 @@ async def notify_track(client):
         await asyncio.sleep(0.1)
 
 
-# def poll_ble():
-#     while True:
-#         loop.run_until_complete(forward_serve_queue.put("no-poll"))
-#         time.sleep(3)
-
-
-
-
-
 def poll_track():
     while True:
         esp_response = notify_track_queue.get()
@@ -129,7 +120,6 @@ async def main(address):
     forward_serve_queue = asyncio.Queue(maxsize=0)
 
     threading.Thread(target=poll_track).start()
-    # threading.Thread(target=poll_ble).start()
 
     async with BleakClient(address) as client:
         await asyncio.gather(
