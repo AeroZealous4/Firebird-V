@@ -161,8 +161,8 @@ class ControlSwitch: public BLECharacteristicCallbacks {
         else
         {
           Serial.printf("Invalid Command received\n");
-          buttonCharacteristic->setValue("Invalid_Command_received");
-          buttonCharacteristic->notify();
+          // buttonCharacteristic->setValue("Invalid_Command_received");
+          // buttonCharacteristic->notify();
         }
       // while(token!=NULL)
       // {

@@ -2,7 +2,6 @@ from coapthon.client.helperclient import HelperClient
 from asgiref.sync import async_to_sync
 from django.conf import settings
 import paho.mqtt.client as mqtt
-from . import connect_robot
 import channels.layers
 import threading
 import asyncio
@@ -10,14 +9,136 @@ import time
 import json
 import os
 
+import os
+import json
+import time
+import queue
+import asyncio
+import threading
+import nest_asyncio
+import channels.layers
+from bleak import BleakClient
+from django.conf import settings
+from asgiref.sync import async_to_sync
+
 
 thingsboard_url = 'thingsboard.e-yantra.org'
 ACCESS_TOKEN = 'TcFcRiMFf7WFxHh1TmBS'
 DEVICE_ID = 'bfedd360-9906-11eb-950e-efef5c07c810'
 subscribe_topic = 'v1/devices/me/rpc/request/+'
 coapc = None
-ble_client = None
+mqttc = None
 record_copy = dict()
+
+forward_serve_queue = None
+notify_serve_queue = None
+notify_track_queue = None
+notify_debug_queue = None
+loop = None
+
+WRITE_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+NOTIFY_SERVE_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
+NOTIFY_TRACK_UUID = "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+NOTIFY_DEBUG_UUID = "beb54840-36e1-4688-b7f5-ea07361b26a8"
+BLE_ADRRESS = "3C:71:BF:4C:81:2A"
+#BLE_ADRRESS = "84:CC:A8:5F:90:D6"
+
+
+async def notify_debug(client):
+    def keypress_debug_handler(sender, data):
+        print("\n\nDEBUG Response: {1}\n\n".format(sender, data))
+    await client.start_notify(NOTIFY_DEBUG_UUID, keypress_debug_handler)
+    while True:
+        await asyncio.sleep(0.1)
+
+
+async def notify_track(client):
+    def keypress_track_handler(sender, data):
+        esp_response = "{1}".format(sender, data)
+        print(f'\n\nTRACK Response: {esp_response}\n\n')
+        notify_track_queue.put(esp_response)
+    await client.start_notify(NOTIFY_TRACK_UUID, keypress_track_handler)
+    while True:
+        await asyncio.sleep(0.1)
+
+
+# def poll_ble():
+#     while True:
+#         loop.run_until_complete(forward_serve_queue.put("no-poll"))
+#         time.sleep(3)
+
+
+
+
+
+def poll_track():
+    while True:
+        esp_response = notify_track_queue.get()
+        esp_response = esp_response.replace("bytearray(b'", "").replace("')", "").split('-')
+        track_data = dict()
+
+        # duration = 1.5
+
+        if "scanned" in esp_response: 
+            track_data = {"scanned": {"plot": esp_response[1], "color": esp_response[-1]}}
+            # duration = 2.5
+
+        elif "debris" in esp_response:
+            track_data = {"debris": {"current": esp_response[1], "dir": esp_response[-1]}}
+            # duration = 1.5
+
+        elif "forward" in esp_response:
+            track_data = {"forward": {"current": esp_response[1], "dest": esp_response[-1]}}
+            # duration = 1.5
+
+        elif "rotate" in esp_response:
+            track_data = {"rotate": {"current": esp_response[1], "face_dir": esp_response[2], "rotate_dir": esp_response[-1]}}
+            # duration = 1.5
+
+        if track_data:
+            # time.sleep(duration)
+            broadcast_track(track_data)
+
+        # await asyncio.sleep(0.1)
+
+
+async def notify_serve(client):
+    def keypress_serve_handler(sender, data):
+        esp_response = "{1}".format(sender, data)
+        print(f'\n\nRobot Response: {esp_response}\n\n')
+        notify_serve_queue.put(esp_response)
+    await client.start_notify(NOTIFY_SERVE_UUID, keypress_serve_handler)
+    while True:
+        await asyncio.sleep(0.1)
+
+
+async def forward_request(client):
+    while True:
+        value = await forward_serve_queue.get()
+        # value = bytearray(b'scan-7-25')
+        value = bytearray(value.encode('utf-8'))
+        await client.write_gatt_char(WRITE_UUID, value)
+        print(f'\n\nForwarded Server Request: {value}\n\n')
+        await asyncio.sleep(2.0)
+
+
+async def main(address):
+    global notify_track_queue, notify_serve_queue, forward_serve_queue
+    notify_track_queue = queue.Queue(maxsize=0)
+    notify_serve_queue = queue.Queue(maxsize=0)
+    forward_serve_queue = asyncio.Queue(maxsize=0)
+
+    threading.Thread(target=poll_track).start()
+    # threading.Thread(target=poll_ble).start()
+
+    async with BleakClient(address) as client:
+        await asyncio.gather(
+            # notify_debug(client),
+            notify_track(client),
+            # poll_track(),
+            notify_serve(client),
+            forward_request(client)
+        )
 
 
 # The callback for when the client receives a CONNACK response from the server.
@@ -25,8 +146,6 @@ def on_connect(client, userdata, flags, rc):
     print("\n\nConnected with result code " + str(rc) + "\n\n")
 
     client.subscribe(subscribe_topic)
-
-    # threading.Thread(target=test_broadcast_track).start()
 
 
 # The callback for when a PUBLISH message is received from the server.
@@ -47,12 +166,6 @@ def on_message(client, userdata, msg):
         response = {"Error": "Error with BLE Device"}
         coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
         broadcast_serve({'response': response})
-        # record_copy[msg.payload] = response
-
-        # threading.Thread(target=ble_client.poll_ble_debug).start()
-        # threading.Thread(target=connect_robot.broadcast_track, args=(ble_client, )).start()
-
-    # rpc_id = os.path.split(msg.topic)[-1]
 
     # Fetch Firebird response
     if request["method"] == "scan":
@@ -70,16 +183,11 @@ def on_message(client, userdata, msg):
     # response = { 'result': 'ok' }
 
     # Forward Firebird response back to Server
-    # global coapc
     coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
     # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
 
     broadcast_serve({'response': response})
     record_copy[msg.payload] = response
-
-    # response = coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(payload))
-    # print(response.code, '\n\n')
-    # coapc.stop()
 
 
 def send_request(request):
@@ -103,23 +211,20 @@ def send_request(request):
     else:
         esp_req_data = "no-request"
 
-    ble_client.loop.run_until_complete(ble_client.forward_request(esp_req_data))
-    # ble_client.forward_serve_queue.put(esp_req_data.encode('utf-8'))
+    loop.run_until_complete(forward_serve_queue.put(esp_req_data))
+
 
 def fetch_serve_response(request_id, method_type, track_info):
 
     timeTaken = None
-    # loop = asyncio.get_event_loop()
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
 
     robot_response = {"id": request_id}
-    esp_response = ble_client.loop.run_until_complete(ble_client.get_serve_response())
+    esp_response = notify_serve_queue.get()
     esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
     while "accepted" == esp_response:
         broadcast_serve({'accept': method_type})
-        esp_response = ble_client.loop.run_until_complete(ble_client.get_serve_response())
+        esp_response = notify_serve_queue.get()
         esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
 
     if "major" in esp_response:
@@ -145,11 +250,8 @@ def fetch_serve_response(request_id, method_type, track_info):
         robot_response["status"] = esp_response
         print(esp_response)
 
-
     if timeTaken is not None:
         robot_response["timeTaken"] = timeTaken
-
-    # time.sleep(6)
 
     return robot_response
 
@@ -164,6 +266,8 @@ def broadcast_serve(request):
         }
     )
 
+    # pass
+
 
 def broadcast_track(request):
     channel_layer = channels.layers.get_channel_layer()
@@ -175,70 +279,44 @@ def broadcast_track(request):
         }
     )
 
+    # pass
+
 
 def setup_mqtt():
+    global mqttc
     mqttc = mqtt.Client()
     mqttc.username_pw_set(ACCESS_TOKEN)
     mqttc.on_connect = on_connect
     mqttc.on_message = on_message
-
-    return mqttc
+    # return mqttc
 
 
 def setup_coap():
     global coapc
     coapc = HelperClient(server=("13.250.13.141", 5683))
-    return coapc
-
-
-def setup_ble():
-    global ble_client
-    ble_client = connect_robot.ESP32_BLE()
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
-    # loop.run_until_complete(ble_client.connect_firebird())
-
-    # threading.Thread(target=ble_client.connect_firebird, args=(loop, )).start()
-    threading.Thread(target=connect_robot.test_one, args=(ble_client, )).start()
+    # return coapc
 
 
 def connect_server(mqttc):
-    setup_ble()
     mqttc.connect(host=thingsboard_url, port=1883, keepalive=1000)
     mqttc.loop_start()
 
-    # mqttc.loop_forever()
 
-
-def disconnect_server(mqttc, coapc):
+def disconnect_server():
+    global coapc, mqttc
     coapc.stop()
     mqttc.loop_stop()
     mqttc.disconnect()
 
 
-def test_broadcast_track():
-    duration = 1.5
+# if __name__ == "__main__":
+def start_iot():
+    setup_mqtt()
+    setup_coap()
+    connect_server(mqttc)
 
-    broadcast_track({"forward": {"current": 77, "dest": 77}})
-    time.sleep(duration)
-    broadcast_track({"forward": {"current": 77, "dest": 68}})
-    time.sleep(duration)
-    broadcast_track({"scanned": {"plot": 14, "color": "red"}})
-    time.sleep(duration)
-    broadcast_track({"rotate": {"current": 68, "face_dir": 'n', "rotate_dir": 'a'}})
-    time.sleep(duration)
-    broadcast_track({"scanned": {"plot": 15, "color": "green"}})
-    time.sleep(duration)
-    broadcast_track({"rotate": {"current": 68, "face_dir": 's', "rotate_dir": 'a'}})
-    time.sleep(duration)
-    broadcast_track({"forward": {"current": 68, "dest": 59}})
-    time.sleep(duration)
-    broadcast_track({"rotate": {"current": 59, "face_dir": 'n', "rotate_dir": 'r'}})
-    time.sleep(duration)
-    broadcast_track({"debris": {"current": 59, "dir": 'e'}})
-    time.sleep(duration)
-    broadcast_track({"rotate": {"current": 59, "face_dir": 'e', "rotate_dir": 'a'}})
-    time.sleep(duration)
-    broadcast_track({"forward": {"current": 59, "dest": 58}})
-    time.sleep(duration)
-    broadcast_track({"forward": {"current": 58, "dest": 57}})
+    global loop
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    nest_asyncio.apply()
+    loop.run_until_complete(main(BLE_ADRRESS))
