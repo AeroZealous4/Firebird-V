@@ -41,7 +41,7 @@ NOTIFY_SERVE_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
 NOTIFY_TRACK_UUID = "beb5483f-36e1-4688-b7f5-ea07361b26a8"
 NOTIFY_DEBUG_UUID = "beb54840-36e1-4688-b7f5-ea07361b26a8"
 BLE_ADRRESS = "3C:71:BF:4C:81:2A"
-BLE_ADRRESS = "84:CC:A8:5F:90:D6"
+#BLE_ADRRESS = "84:CC:A8:5F:90:D6"
 
 
 async def notify_debug(client):
@@ -123,7 +123,7 @@ async def main(address):
 
     async with BleakClient(address) as client:
         await asyncio.gather(
-            notify_debug(client),
+            # notify_debug(client),
             notify_track(client),
             # poll_track(),
             notify_serve(client),
