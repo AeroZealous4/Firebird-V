@@ -321,8 +321,17 @@ void loop() {
       break;
     }
 
+      if(index < 45)
         testStr[index++] = ch_msg;
-        flag = 3;
+      else  
+        {
+          Serial.print("\nError: Index excedded");
+          Serial.print(testStr);
+          break;
+        }
+
+
+    flag = 4;
 
       delay(2); //To enable reading of entrire string
 
@@ -358,6 +367,12 @@ void loop() {
     DebugCharacteristic->setValue(testStr);
     DebugCharacteristic->notify();
     flag = 0;
+  }
+  else if(flag==4)
+  {
+    Serial.print("\nGarbage data flushed");
+    // Serial.print(testStr);
+    index = 0;
   }
 
 }

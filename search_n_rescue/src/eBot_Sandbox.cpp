@@ -217,7 +217,7 @@ bool Ent_Cmd(void)
 			
 			// rotate_comm(Get_Curr_Node(),Get_Curr_Head(),rot_dir);
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
-			// forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
+			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
@@ -319,7 +319,7 @@ bool Task_2B(void)
 			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Get_Curr_Node());
 
 			#ifdef DEBUG_SAND
-				sprintf(str,"Before dikstra, Dest node:%d\n^",Dest_Node);
+				sprintf(str,"Before dikstra, Dest node:%d\n$",Dest_Node);
 				uart_send_string(str);
 			#endif
 
@@ -327,7 +327,7 @@ bool Task_2B(void)
 			In_Path = true;
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Des Plot Nu:%d\n^",Next_Plot_to_Scan());
+			sprintf(str,"Des Plot Nu:%d\n$",Next_Plot_to_Scan());
 			uart_send_string(str);
 			#endif
 		}
@@ -337,7 +337,7 @@ bool Task_2B(void)
 			In_Path = false;
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Plot Scan Complete\n^");
+			sprintf(str,"Plot Scan Complete\n$");
 			uart_send_string(str);
 			#endif
 		}
@@ -351,10 +351,10 @@ bool Task_2B(void)
 		if( Get_Curr_Node() != Dest_Node )	//Goes to next node
 		{
 			#ifdef DEBUG_SAND
-			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
+			sprintf(str,"Moving to node:%d\n$",Nxt_Node);
 			uart_send_string(str);
 			#endif
-			// forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
+			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_wls(1);	//Move to next node
 
@@ -389,14 +389,14 @@ bool Task_2B(void)
 		else if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
 		{
 			#ifdef DEBUG_SAND
-			sprintf(str,"Plot nu %d reached\n^",Next_Plot_to_Scan());
+			sprintf(str,"Plot nu %d reached\n$",Next_Plot_to_Scan());
 			uart_send_string(str);
 			#endif
 
 			turn_head_to_plot(Get_Dir_Plot());
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Rotation finished\n^");
+			sprintf(str,"Rotation finished\n$");
 			uart_send_string(str);
 			#endif
 
@@ -409,7 +409,7 @@ bool Task_2B(void)
 			if(Type_Inj == 'R')
 			{
 				#ifdef DEBUG_SAND
-				sprintf(str,"Plot no: %d with Major Injury\n^",Next_Plot_to_Scan());
+				sprintf(str,"Plot no: %d with Major Injury\n$",Next_Plot_to_Scan());
 				#endif
 				Scan_Res(Next_Plot_to_Scan(),'M');
 				scanned_comm(Next_Plot_to_Scan(),'M');
