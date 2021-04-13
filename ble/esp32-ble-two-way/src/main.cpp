@@ -40,10 +40,23 @@ volatile int buttonState = HIGH;
 
 void pin_ISR();
 
+/**
+ * Update connection parameters can be called only after connection has been established
+ */
+// void BLEServer::updateConnParams(esp_bd_addr_t remote_bda, uint16_t minInterval, uint16_t maxInterval, uint16_t latency, uint16_t timeout) {
+// 	esp_ble_conn_update_params_t conn_params;
+// 	memcpy(conn_params.bda, remote_bda, sizeof(esp_bd_addr_t));
+// 	conn_params.latency = latency;
+// 	conn_params.max_int = maxInterval;    // max_int = 0x20*1.25ms = 40ms
+// 	conn_params.min_int = minInterval;    // min_int = 0x10*1.25ms = 20ms
+// 	conn_params.timeout = timeout;    // timeout = 400*10ms = 4000ms
+// 	esp_ble_gap_update_conn_params(&conn_params); 
+// }
 
 class ServerCallbacks: public BLEServerCallbacks {
-    void onConnect(BLEServer* pServer) {
+    void onConnect(BLEServer* pServer, esp_ble_gatts_cb_param_t *param) {
       Serial.println("Central connected XD");
+      pServer->updateConnParams(param->connect.remote_bda, 0x01, 0x90, 0, 6000);
       deviceConnected = true;
     };
  
@@ -272,7 +285,7 @@ int tem = 500;
 int flag = 0;
 char ch_msg;
 
-void loop() {
+void loop() { 
 
   int index = 0;
   char testStr[] ="Request accepted------------------------------";
@@ -282,6 +295,9 @@ void loop() {
 
   char Fwd_Trac[] = "forward-60-59";
   char scan_Trac[] = "scanned-5-green";
+
+  if(deviceConnected == false)  //Resets ESP32 if ble is diconnected
+    ESP.restart();
 
   // while(1)
   // {
