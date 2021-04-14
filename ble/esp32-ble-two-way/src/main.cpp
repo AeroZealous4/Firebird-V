@@ -287,6 +287,8 @@ char ch_msg;
 
 void loop() { 
 
+  if(deviceConnected == true) 
+  {
   int index = 0;
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
@@ -296,8 +298,8 @@ void loop() {
   char Fwd_Trac[] = "forward-60-59";
   char scan_Trac[] = "scanned-5-green";
 
-  if(deviceConnected == false)  //Resets ESP32 if ble is diconnected
-    ESP.restart();
+  // if(deviceConnected == false)  //Resets ESP32 if ble is diconnected
+  //   ESP.restart();
 
   // while(1)
   // {
@@ -391,6 +393,7 @@ void loop() {
     index = 0;
   }
 
+  }
 }
 
 
