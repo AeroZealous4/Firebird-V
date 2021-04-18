@@ -397,6 +397,7 @@ void loop() {
     Serial.print("\nGarbage data flushed");
     // Serial.print(testStr);
     index = 0;
+    flag = 0;
   }
 
   }
