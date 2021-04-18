@@ -35,6 +35,8 @@ BLECharacteristic *buttonCharacteristic;
 BLECharacteristic *TrackCharacteristic;
 BLECharacteristic *DebugCharacteristic;
 
+BLEService *lightSwitchService;
+
 bool deviceConnected = false;
 volatile int buttonState = HIGH;
 
@@ -63,6 +65,7 @@ class ServerCallbacks: public BLEServerCallbacks {
     void onDisconnect(BLEServer* pServer) {
       Serial.println("Central dis-connected :(");
       deviceConnected = false;
+      lightSwitchService->start();
     }
 };
 
@@ -225,7 +228,8 @@ void setup() {
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new ServerCallbacks());
 
-  BLEService *lightSwitchService = pServer->createService(SERVICE_UUID);
+  // BLEService *
+  lightSwitchService = pServer->createService(SERVICE_UUID);
   ledCharacteristic = lightSwitchService->createCharacteristic(
                             LED_CHARACTERISTIC_UUID,
                             BLECharacteristic::PROPERTY_READ |
