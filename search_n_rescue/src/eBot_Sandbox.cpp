@@ -219,7 +219,38 @@ bool Ent_Cmd(void)
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			forward_wls(1);	//Move to next node
-			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
+
+			if(Is_Debris())
+			{
+				// sprintf(str,"Debris Detected: %d to %d$",Get_Curr_Node(),Nxt_Node);
+				// uart_send_string(str);
+
+				if( Get_Curr_Head()== 'E')
+					turn_head( 'W' );
+				else if( Get_Curr_Head()== 'S')
+					turn_head( 'N' );
+				else if( Get_Curr_Head()== 'W')
+					turn_head( 'E' );
+				else if( Get_Curr_Head()== 'N')
+					turn_head( 'S' );
+
+				forward_wls(1);	//Move to next node
+
+				Adj_Update(Get_Curr_Node(), Nxt_Node, Dest_Node);	
+
+				if(Is_Scan())
+					Dest_Node = Min_Dist_Node_Fr_Plot( Scan_Plot_No(),Get_Curr_Node());
+				else if( Is_Major() || Is_Minor())
+					Dest_Node = Min_Dist_Node_Fr_Plot( Req_Plot_No,Get_Curr_Node());
+				// 	Req_Plot_No = Fetch_plot_no_req('M',Get_Curr_Node());
+				// else if( Is_Minor() )
+				// 	Req_Plot_No = Fetch_plot_no_req('m',Get_Curr_Node());
+
+				dijkstra(Dest_Node);	//Updates path to travel to Dest node
+				
+			}
+			else
+				Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
 			#ifdef DEBUG_SAND
 			sprintf(str,"Reached node:%d\n^",Nxt_Node);
@@ -358,29 +389,33 @@ bool Task_2B(void)
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
 			forward_wls(1);	//Move to next node
 
-			// if(Is_Debris())
-			// {
-			// 	sprintf(str,"Debris Detected: %d to %d$",Get_Curr_Node(),Nxt_Node);
-			// 	uart_send_string(str);
+			if(Is_Debris())
+			{
+				// sprintf(str,"Debris Detected: %d to %d$",Get_Curr_Node(),Nxt_Node);
+				// uart_send_string(str);
 
-			// 	if( Get_Curr_Head()== 'E')
-			// 		turn_head( 'W' );
-			// 	else if( Get_Curr_Head()== 'S')
-			// 		turn_head( 'N' );
-			// 	else if( Get_Curr_Head()== 'W')
-			// 		turn_head( 'E' );
-			// 	else if( Get_Curr_Head()== 'N')
-			// 		turn_head( 'S' );
+				if( Get_Curr_Head()== 'E')
+					turn_head( 'W' );
+				else if( Get_Curr_Head()== 'S')
+					turn_head( 'N' );
+				else if( Get_Curr_Head()== 'W')
+					turn_head( 'E' );
+				else if( Get_Curr_Head()== 'N')
+					turn_head( 'S' );
 
-			// 	forward_wls(1);	//Move to next node
+				forward_wls(1);	//Move to next node
 
-			// 	Adj_Update(Get_Curr_Node(), Nxt_Node, Dest_Node);				
-			// }
-			// else
+				Adj_Update(Get_Curr_Node(), Nxt_Node, Dest_Node);	
+				Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Get_Curr_Node());
+				dijkstra(Dest_Node);	//Updates path to travel to Dest node
+			}
+			else
 				Set_Curr_Node(Nxt_Node);
 
 			In_Path = true;
 			
+			// sprintf(str,"Reached node:%d\n$",Nxt_Node);
+			// uart_send_string(str);
 			#ifdef DEBUG_SAND
 				sprintf(str,"Reached node:%d\n$",Nxt_Node);
 				uart_send_string(str);
@@ -465,11 +500,26 @@ void Controller(void)
 	// int return_code;
 
 	init_all_peripherals();
-	// while(1)
-	// {
-	// 	forward_comm(0,61);//Sends current node status to esp32
-	// }
+	
 	calibrate();
+
+	// forward_comm(82,77);
+	// _delay_ms(3000);
+	// rotate_comm(77,'n','r');
+	// _delay_ms(3000);
+	// forward_comm(77,78);
+	// _delay_ms(3000);
+	// forward_comm(78,79);
+	// _delay_ms(3000);
+
+	// rotate_comm(79,'e','l');
+	// _delay_ms(3000);
+	// debris_comm(79,'n');
+	// _delay_ms(3000);
+
+	// while(1);
+
+	
 	#ifdef DEBUG_SAND
 		sprintf(str,"Cal Done\n$");
 		uart_send_string(str);

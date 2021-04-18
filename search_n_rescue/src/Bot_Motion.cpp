@@ -383,6 +383,39 @@ void forward_wls1(unsigned char node)
 	forward_mm(95);
    stop();
 }
+bool debris_detection(void)
+{
+	bool debris_detected = false;
+	bool onleft, onright, oncenter;
+	unsigned char state;
+	Update_Read();
+//	onleft = (left_wl_sensor_data == 7) || (left_wl_sensor_data == 6);
+	onleft = (left_wl_sensor_data == 7);	
+	oncenter = (center_wl_sensor_data == 7);
+//	onright = (right_wl_sensor_data == 7);
+	onright = (right_wl_sensor_data == 7) || (right_wl_sensor_data == 8);
+//	onleft = (left_wl_sensor_data < wl_sen_th_l_cal);
+//	oncenter = (center_wl_sensor_data < wl_sen_th_l_cal);
+//	onright = (right_wl_sensor_data < wl_sen_th_l_cal);
+
+	state = onleft << 2 | oncenter << 1 | onright;
+	if( state == 7 )
+	{
+		// lcd_numeric_value(2,1,left_wl_sensor_data,3);
+		// lcd_numeric_value(2,5,center_wl_sensor_data,3);
+		// lcd_numeric_value(2,9,right_wl_sensor_data,3);
+		// if(curr_loc.x == 7 && curr_loc.y == 0){
+		// 	_delay_ms(1000);
+		// }
+		// lcd_clear();
+
+		debris_detected = true;
+	}
+	else{
+		debris_detected = false;
+	}
+	return debris_detected;
+}
 bool Debris_flag = false;
 void forward_wls(unsigned char node)
 {
@@ -402,6 +435,12 @@ void forward_wls(unsigned char node)
 					Debris_flag = false;
 					break; //Next node reached
 				}
+			if(debris_detection())
+			{
+				stop();
+				Debris_flag = true;
+				break; //Debris Detected
+			}
 			// else if( (center_wl_sensor_data < wl_sen_th_l_cal) && (left_wl_sensor_data < wl_sen_th_l_cal ) && (right_wl_sensor_data < wl_sen_th_l_cal) )
 			// {
 			// 	if(debris_det++ >= 1)

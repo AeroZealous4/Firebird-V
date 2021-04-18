@@ -407,7 +407,7 @@ void dijkstra(int src)
 //				from Adj matrix of graph and updates new shortest path i.e. parent vector
 void Adj_Update(int i, int j, int Dest_Node)
 {
-	if( j < 50 && i< 50 && j>=0 && i>=0)
+	if( j < V && i< V && j>=0 && i>=0)
 	{
 		graph[i][j] = 0;
 		graph[j][i] = 0;
@@ -418,7 +418,7 @@ void Adj_Update(int i, int j, int Dest_Node)
 			graph[j][Next_Node(j)] = 0;
 		}
 
-		dijkstra(Dest_Node);
+		// dijkstra(Dest_Node);
 	}	
 } 
 

@@ -21,6 +21,7 @@
 #define LED_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BUTTON_CHARACTERISTIC_UUID "8801f158-f55e-4550-95f6-d260381b99e7"
 #define NOTIFY_TRACK_UUID "beb5483f-36e1-4688-b7f5-ea07361b26a8"
+// #define NOTIFY_DEBUG_UUID "beb54840-36e1-4688-b7f5-ea07361b26a8"
 #define NOTIFY_DEBUG_UUID "beb54840-36e1-4688-b7f5-ea07361b26a8"
 
 #define RXD2 16
@@ -350,14 +351,14 @@ void loop() {
         {
           Serial.print("\nError: Index excedded");
           Serial.print(testStr);
-          // index = 0;
+          index = 0;
           break;
         }
 
 
     flag = 4;
 
-      delay(2); //To enable reading of entrire string
+      delay(10); //To enable reading of entrire string
 
   }
 
@@ -400,6 +401,7 @@ void loop() {
     flag = 0;
   }
 
+    flag = 0;
   }
 }
 
