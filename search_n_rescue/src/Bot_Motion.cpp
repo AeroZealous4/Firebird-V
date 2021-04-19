@@ -251,156 +251,26 @@ void PID()
 	// set_motor_velocities();
 }
 //Debug function for cal debris
-void Deb_WL_Debris(void)
-{
-	Update_Read();
-	sprintf(str_temp1,"Cal:%d %d %d\n",leftValue,centerValue,rightValue);
-	uart_send_string(str_temp1);
+// void Deb_WL_Debris(void)
+// {
+// 	Update_Read();
+// 	sprintf(str_temp1,"Cal:%d %d %d\n",leftValue,centerValue,rightValue);
+// 	uart_send_string(str_temp1);
 
-	sprintf(str_temp1,"WL:%d %d %d\n",left_wl_sensor_data,center_wl_sensor_data,right_wl_sensor_data);
-	uart_send_string(str_temp1);
+// 	sprintf(str_temp1,"WL:%d %d %d\n",left_wl_sensor_data,center_wl_sensor_data,right_wl_sensor_data);
+// 	uart_send_string(str_temp1);
 
-	_delay_ms(3000);
-}
-/*
-*
-* Function Name: forward_wls
-* Input: node
-* Output: void
-* Logic: Uses white line sensors to go forward by the number of nodes specified
-* Example Call: forward_wls(2); //Goes forward by two nodes
-*
-*/
-//
-bool onleft, onright,oncenter;
-unsigned char state,state_inv;
-void forward_wls1(unsigned char node)
-{
+// 	_delay_ms(3000);
+// }
 
-	unsigned char invert = 0;
-    // int flag = 0;
-	int l_flag = 0;
-    for (int i = 0; i < node; i++)
-	{
-    	// flag = 0;
-		while(center_wl_sensor_data > wl_sen_th && (left_wl_sensor_data > wl_sen_th || right_wl_sensor_data > wl_sen_th) == 0 )
-		{
-			Update_Read();
-			onleft = (left_wl_sensor_data < wl_sen_th_l);
-			onright = (right_wl_sensor_data < wl_sen_th_l);
-			oncenter = (center_wl_sensor_data < wl_sen_th_l);
-
-			if(invert == 1)
-			{
-				onleft ^= invert;
-				onright ^= invert;
-				oncenter ^= invert;
-			}
-
-
-			state = onleft<<2 | oncenter<<1 | onright;
-			// printf("ON: %d, %d, %d: %d\n",onleft, oncenter, onright, state);
-			switch (state) {
-				case 0:
-					// forward_mm(95);
-					forward();
-					velocity(125,175);
-					// flag = 1;
-					break;
-				case 1:
-					// LB; CB; RW; Left is just inside the line
-					soft_left();
-					l_flag = 1;
-					velocity(0,125);
-					_delay_ms(50);
-					break;
-				case 2:
-						forward();
-						velocity(170,170);
-						_delay_ms(50);
-						break;
-					
-				case 3:
-					// LB; CW; RW; Center is out of line; Left on line
-					left();
-					l_flag = 1;
-					velocity(125,175);
-					_delay_ms(50);
-					break;
-				case 4:
-					// LW; CB; RB; Right is just inside the line
-					soft_right();
-					l_flag = 0;
-					velocity(125,0);
-					_delay_ms(50);
-					break;
-				case 5:
-					// LW; CB; RW; Just center is on the line; Move forward
-					if(invert == 1)
-					{
-						forward();
-						velocity(128,128);
-						_delay_ms(100);
-					}
-					else
-					{
-						
-						forward();
-						velocity(175,175);
-						_delay_ms(100);
-					}
-					break;
-				case 6:
-					// LW; CW; RB; Center is out of line; Right on line
-					right();
-					l_flag = 0;
-					velocity(175,125);
-					_delay_ms(50);
-					break;
-				case 7:
-					// LW; CW; RW; All sensors out of line
-					// If moving right previously, then move left and vice versa
-					if(invert == 1)
-					{
-						if(l_flag == 0){
-							right();
-							velocity(10,10);
-							_delay_ms(60);
-						}
-						else{
-							left();
-							velocity(10,10);
-							_delay_ms(60);
-						}
-						break;
-					}
-					else{
-					    if(l_flag == 0){
-						right();
-						velocity(125,125);
-						_delay_ms(5);
-					    }
-					    else{
-						left();
-						velocity(125,125);
-						_delay_ms(5);
-					    }
-					}
-					break;
-				default:
-					break;
-			}
-		}
-	}
-	forward_mm(95);
-   stop();
-}
 bool debris_detection(void)
 {
 	bool debris_detected = false;
 	bool onleft, onright, oncenter;
 	unsigned char state;
 	static int Pol_Count = 0;
+
+
 
 	// for(int i=0; i<200;i++)
 	// {
@@ -426,7 +296,7 @@ bool debris_detection(void)
 		// 	_delay_ms(1000);
 		// }
 		// lcd_clear();
-		if(Pol_Count++ >= 250)
+		if(Pol_Count++ >= 275)
 		{
 
 			debris_detected = true;
@@ -444,6 +314,7 @@ bool debris_detection(void)
 	}
 
 	// }
+
 
 	return debris_detected;
 }
@@ -472,6 +343,7 @@ void forward_wls(unsigned char node)
 				Debris_flag = true;
 				break; //Debris Detected
 			}
+			
 			// else if( (center_wl_sensor_data < wl_sen_th_l_cal) && (left_wl_sensor_data < wl_sen_th_l_cal ) && (right_wl_sensor_data < wl_sen_th_l_cal) )
 			// {
 			// 	if(debris_det++ >= 1)

@@ -271,7 +271,7 @@ bool Ent_Cmd(void)
 			uart_send_string(str);
 			#endif
 
-			forward_mm(180);
+			// forward_mm(180);
 				// sprintf(str,"Center of block no: %d reached\n^",Next_Plot_to_Scan());
 				// uart_send_string(str);
 
@@ -309,7 +309,7 @@ bool Ent_Cmd(void)
 			#endif
 
 			Task_Complete(); //Req Full filled
-			back_mm(180);
+			// back_mm(180);
 			#ifdef DEBUG_SAND
 			sprintf(str,"Plot scan compl^");
 			uart_send_string(str);
@@ -435,7 +435,7 @@ bool Task_2B(void)
 			uart_send_string(str);
 			#endif
 
-			forward_mm(180);
+			// forward_mm(180);
 				// sprintf(str,"Center of block no: %d reached\n^",Next_Plot_to_Scan());
 				// uart_send_string(str);
 
@@ -468,7 +468,7 @@ bool Task_2B(void)
 				uart_send_string(str);
 			#endif
 			Plot_Scan_Compl();
-			back_mm(180);
+			// back_mm(180);
 
 			In_Path = false;
 
