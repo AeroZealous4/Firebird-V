@@ -191,7 +191,7 @@ unsigned char getSensorPercent(int value, int min, int max) {
 */
 void PID()
 {
-	float k_p = 0.5,k_d = 0.002;
+	float k_p = 0.60,k_d = 0.05; //k_p = 0.50,k_d = 0.002; Working k_p value
 	static float error_d = 0;//line_old=0.0 ;
 	Update_Read();
 	//Print value
@@ -249,6 +249,18 @@ void PID()
 	#endif
 	velocity(L, R); //Differential velocity
 	// set_motor_velocities();
+}
+//Debug function for cal debris
+void Deb_WL_Debris(void)
+{
+	Update_Read();
+	sprintf(str_temp1,"Cal:%d %d %d\n",leftValue,centerValue,rightValue);
+	uart_send_string(str_temp1);
+
+	sprintf(str_temp1,"WL:%d %d %d\n",left_wl_sensor_data,center_wl_sensor_data,right_wl_sensor_data);
+	uart_send_string(str_temp1);
+
+	_delay_ms(3000);
 }
 /*
 *
@@ -388,12 +400,18 @@ bool debris_detection(void)
 	bool debris_detected = false;
 	bool onleft, onright, oncenter;
 	unsigned char state;
-	Update_Read();
+	static int Pol_Count = 0;
+
+	// for(int i=0; i<200;i++)
+	// {
+
+	//Update_Read();
+
 //	onleft = (left_wl_sensor_data == 7) || (left_wl_sensor_data == 6);
-	onleft = (left_wl_sensor_data == 7);	
-	oncenter = (center_wl_sensor_data == 7);
+	onleft = (left_wl_sensor_data <= 9);	
+	oncenter = (center_wl_sensor_data <= 9);
 //	onright = (right_wl_sensor_data == 7);
-	onright = (right_wl_sensor_data == 7) || (right_wl_sensor_data == 8);
+	onright = (right_wl_sensor_data <= 9);// || (right_wl_sensor_data == 8);
 //	onleft = (left_wl_sensor_data < wl_sen_th_l_cal);
 //	oncenter = (center_wl_sensor_data < wl_sen_th_l_cal);
 //	onright = (right_wl_sensor_data < wl_sen_th_l_cal);
@@ -408,12 +426,25 @@ bool debris_detection(void)
 		// 	_delay_ms(1000);
 		// }
 		// lcd_clear();
+		if(Pol_Count++ >= 250)
+		{
 
-		debris_detected = true;
+			debris_detected = true;
+			// break;
+		}
+		else
+		{
+			debris_detected = false;
+		}
+
 	}
 	else{
+		Pol_Count = 0;
 		debris_detected = false;
 	}
+
+	// }
+
 	return debris_detected;
 }
 bool Debris_flag = false;
@@ -485,7 +516,7 @@ bool Is_Debris(void)
 void left_turn_wls(void)
 {
 	velocity(Cruise_Vel0, Cruise_Vel0);	
-	left_degrees(65);
+	left_degrees(50);//65
 	velocity (Cruise_Vel0, Cruise_Vel0);
 	left();
 	// _delay_ms(turn_delay);	//Tune the delay
@@ -512,7 +543,7 @@ void left_turn_wls(void)
 void right_turn_wls(void)
 {
 	velocity (Cruise_Vel0, Cruise_Vel0);	
-	right_degrees(65);
+	right_degrees(50);	//65
 	velocity (Cruise_Vel0, Cruise_Vel0);
 	right();
 	// _delay_ms(turn_delay);	//Tune the delay

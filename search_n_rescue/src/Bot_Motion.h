@@ -36,4 +36,8 @@ bool Is_Debris(void); //If debris is detected
 
 void turn_head(char Head); //Takes desired heading and turn Bot to desired direction 
 void turn_head_to_plot(char Head); // Use this function to turn to plot
+
+
+//Debug function for cal debris
+void Deb_WL_Debris(void);
 #endif /* BOT_MOTION_H_*/

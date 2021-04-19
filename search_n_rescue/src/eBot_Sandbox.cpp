@@ -500,6 +500,20 @@ void Controller(void)
 	// int return_code;
 
 	init_all_peripherals();
+
+	// while(1)
+	// {
+	// 	//Debug function for cal debris
+	// 	Deb_WL_Debris();
+	// 	/*
+	// 	Cal:
+	// 		White:
+	// 		Black:
+	// 	Sens:
+	// 		White:
+	// 		Black:3
+	// 	*/
+	// }
 	
 	calibrate();
 
@@ -517,7 +531,7 @@ void Controller(void)
 	// debris_comm(79,'n');
 	// _delay_ms(3000);
 
-	// while(1);
+
 
 	
 	#ifdef DEBUG_SAND
