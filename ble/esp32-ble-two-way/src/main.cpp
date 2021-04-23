@@ -20,8 +20,6 @@
 #define SERVICE_UUID "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define LED_CHARACTERISTIC_UUID "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 #define BUTTON_CHARACTERISTIC_UUID "8801f158-f55e-4550-95f6-d260381b99e7"
-#define NOTIFY_TRACK_UUID "beb5483f-36e1-4688-b7f5-ea07361b26a8"
-#define NOTIFY_DEBUG_UUID "beb5483a-36e1-4688-b7f5-ea07361b26a8"
 
 #define RXD2 16
 #define TXD2 17
@@ -32,8 +30,6 @@ unsigned char led_toggle = 0;
 
 BLECharacteristic *ledCharacteristic;
 BLECharacteristic *buttonCharacteristic;
-BLECharacteristic *TrackCharacteristic;
-BLECharacteristic *DebugCharacteristic;
 
 bool deviceConnected = false;
 volatile int buttonState = HIGH;
@@ -161,8 +157,8 @@ class ControlSwitch: public BLECharacteristicCallbacks {
         else
         {
           Serial.printf("Invalid Command received\n");
-          // buttonCharacteristic->setValue("Invalid_Command_received");
-          // buttonCharacteristic->notify();
+          buttonCharacteristic->setValue("Invalid_Command_received");
+          buttonCharacteristic->notify();
         }
       // while(token!=NULL)
       // {
@@ -230,34 +226,11 @@ void setup() {
                         );
   // client charactersitic descriptor: required for notify
   buttonCharacteristic->addDescriptor(new BLE2902());
-  // lightSwitchService->start();
-
-
-  TrackCharacteristic = lightSwitchService->createCharacteristic(
-                          NOTIFY_TRACK_UUID,
-                          BLECharacteristic::PROPERTY_NOTIFY
-                        );
-  // client charactersitic descriptor: required for notify
-  TrackCharacteristic->addDescriptor(new BLE2902());
-
-  DebugCharacteristic = lightSwitchService->createCharacteristic(
-                          NOTIFY_DEBUG_UUID,
-                          BLECharacteristic::PROPERTY_NOTIFY
-                        );
-  // client charactersitic descriptor: required for notify
-  DebugCharacteristic->addDescriptor(new BLE2902());
-
   lightSwitchService->start();
 
   // off initially
   ledCharacteristic->setValue("0");
   buttonCharacteristic->setValue("0");
-  TrackCharacteristic->setValue("0");
-  DebugCharacteristic->setValue("0");
-
-  // char testStr[] ="Request accepted";
-  // TrackCharacteristic->setValue(testStr);
-  // TrackCharacteristic->notify();
 
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(SERVICE_UUID);
@@ -268,113 +241,81 @@ void setup() {
   Serial.println("Characteristic defined! Now you can read it in your phone!");
 }
 
-int tem = 500;
-int flag = 0;
+int tem =500;
+int flag =0;
 char ch_msg;
-
 void loop() {
-
   int index = 0;
+  String d = "";
   char testStr[] ="Request accepted------------------------------";
   // Serial2.write(str_msg);
-  unsigned long time = millis();
-  unsigned long delay_var = 3700;
-
-  char Fwd_Trac[] = "forward-60-59";
-  char scan_Trac[] = "scanned-5-green";
-
-  // while(1)
-  // {
-  //   if(millis() > (time+delay ) )
-  //   {
-  //     Serial.print(Fwd_Trac);
-  //     TrackCharacteristic->setValue(Fwd_Trac);
-  //     TrackCharacteristic->notify();
-
-  //     // Serial.print(scan_Trac);
-  //     // TrackCharacteristic->setValue(scan_Trac);
-  //     // TrackCharacteristic->notify();
-
-  //     time = millis();
-  //   }
-
-  // }
   while(Serial2.available())
   {
     
     ch_msg =char (Serial2.read());
     Serial.print(ch_msg);
 
-    if(ch_msg=='^')
-    {
-      flag = 1;
-      break;
-    }
-    else if(ch_msg == '!')
-    {
-      flag = 2;
-      break;
-    }
-    else if(ch_msg == '$')
-    {
-      flag = 3;
-      break;
-    }
-
-      if(index < 45)
+  // //1 Using special character from Robot to ESP 32
+  //   if(ch_msg == '!') //Request Accepted i.e. ack from bot 
+  //   {
+  //     // testStr[] = "Request accepted";
+  //     Serial.print("Request accepted");
+  //     buttonCharacteristic->setValue("accepted");
+  //     buttonCharacteristic->notify();
+  //   }        
+  //   else if(ch_msg == '@') //Last Task Completed
+  //   {
+  //     Serial.print("Task Complete");
+  //     sprintf(testStr,"%s-%d",last(int) (-Sec + millis()/1000) );
+  //     buttonCharacteristic->setValue(testStr);
+  //     buttonCharacteristic->notify();
+  //   }        
+  //   else if(ch_msg == '3')
+  //   {
+  //     Serial.print("Task Flushed");
+  //     // sprintf(testStr,"%d",(int) (-Sec + millis()/1000) );
+  //     buttonCharacteristic->setValue("Task_Flushed");
+  //     buttonCharacteristic->notify();
+  //   //  Serial.print("Task Not accepted or rejected");
+  //   //  buttonCharacteristic->setValue("Task Not accepted or rejected");        
+  //   }
+  //   else 
+  //   {
+        d += ch_msg;
         testStr[index++] = ch_msg;
-      else  
-        {
-          Serial.print("\nError: Index excedded");
-          Serial.print(testStr);
-          break;
-        }
-
-
-    flag = 4;
-
-      delay(2); //To enable reading of entrire string
+        flag = 1;
+    // }
+      delay(1); //To enable reading of entrire string
 
   }
 
-  if(flag==1)
+  if(flag)
   {
-
+    d += '\0';//NULL;
     testStr[index] = '\0';//NULL;
-    Serial.print("\nCmd:");
-    Serial.print(testStr);
       // buttonCharacteristic->setValue(d.c_str());
       buttonCharacteristic->setValue(testStr);
       buttonCharacteristic->notify();
     flag = 0;
   }
-  else if(flag==2)
-  {
-    testStr[index] = '\0';//NULL;
-    Serial.print("\nTrack:");
-    Serial.print(testStr);
-    // buttonCharacteristic->setValue(d.c_str());
-    TrackCharacteristic->setValue(testStr);
-    TrackCharacteristic->notify();
-    flag = 0;
-  }
-  else if(flag==3)
-  {
-    testStr[index] = '\0';//NULL;
-    Serial.print("\nDebug:");
-    Serial.print(testStr);
+  // else
+  //   Serial.print("Serial Port 2 not available");
 
-    DebugCharacteristic->setValue(testStr);
-    DebugCharacteristic->notify();
-    flag = 0;
-  }
-  else if(flag==4)
-  {
-    Serial.print("\nGarbage data flushed");
-    // Serial.print(testStr);
-    index = 0;
-  }
-
+  // delay(1000);
+  // if (buttonState == LOW) {
+  //   Serial.println("Button pressed!");
+  //   if (buttonCharacteristic->getValue() == "0") {
+  //     // Serial.println("Button pressed!");
+  //     tem = (int) 0x0500;
+  //     buttonCharacteristic->setValue(tem);
+  //     buttonCharacteristic->notify();
+  //   }
+  //   else {
+  //     tem = (int) 0x0700;
+  //     buttonCharacteristic->setValue(tem);
+  //     buttonCharacteristic->notify();
+  //   }
+  // }
 }
 
 

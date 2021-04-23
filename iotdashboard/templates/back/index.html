@@ -65,8 +65,9 @@
         draw.polyline([[0,0], [80,0], [160,0], [240,0], [320,0], [400,0], [480,0], [560,0], [685,0]]).fill('none').move(15, 205).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
 
         draw.line(13, 0, 37, 0).move(708, 205).stroke({ color: '#f06', width: 3, linecap: 'square' });
+        var node83 = draw.rect(1, 1).move(715, 200).fill('none');
         draw.line(0, 5, 0, 45).move(720, 185).stroke({ color: '#f06', width: 3, linecap: 'square' });
-        draw.text('Medical Camp').move(670, 105).font({ fill: '#f06', family: 'Inconsolata' }).rotate(270);
+        draw.text('Medical Camp').move(675, 105).font({ fill: '#f06', family: 'Inconsolata' }).rotate(270);
 
 
         // Fourth Row
@@ -121,8 +122,8 @@
         var node68 = draw.rect(10, 10).move(330, 350).fill('#000');
 
         draw.line(335, 405, 335, 460).stroke({ color: '#000', width: 3 });
-        draw.rect(40, 20).move(315, 445).fill('#000');
-        draw.text('Start').move(315, 465).font({ fill: '#f06', family: 'Inconsolata' });
+        var node82 = draw.rect(40, 20).move(315, 445).fill('#000');
+        draw.text('Start').move(320, 465).font({ fill: '#f06', family: 'Inconsolata' });
 
         // Fourth column
         draw.polyline([[0,105], [0,205], [0,305], [0,405], [0, 505]]).fill('none').move(495, 5).stroke({ color: '#000', width: 3, linecap: 'round', linejoin: 'round' });
@@ -142,13 +143,13 @@
 
 
         var robotImg_n = draw.image('{% static "back/dashboard/img/robot-n.png" %}')
-        robotImg_n.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        robotImg_n.size(30, 30).move(node82.x() + 5, node82.y() - 10);
         var robotImg_e = draw.image('{% static "back/dashboard/img/robot-e.png" %}')
-        robotImg_e.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        robotImg_e.size(30, 30).move(node82.x() + 5, node82.y() - 10);
         var robotImg_w = draw.image('{% static "back/dashboard/img/robot-w.png" %}')
-        robotImg_w.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        robotImg_w.size(30, 30).move(node82.x() + 5, node82.y() - 10);
         var robotImg_s = draw.image('{% static "back/dashboard/img/robot-s.png" %}')
-        robotImg_s.size(30, 30).move(node77.x() - 10, node77.y() + 35);
+        robotImg_s.size(30, 30).move(node82.x() + 5, node82.y() - 10);
 
         robotImg_n.hide();
         robotImg_e.hide();

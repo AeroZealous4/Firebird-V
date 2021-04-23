@@ -41,31 +41,46 @@ NOTIFY_SERVE_UUID = "8801f158-f55e-4550-95f6-d260381b99e7"
 NOTIFY_TRACK_UUID = "beb5483f-36e1-4688-b7f5-ea07361b26a8"
 NOTIFY_DEBUG_UUID = "beb54840-36e1-4688-b7f5-ea07361b26a8"
 BLE_ADRRESS = "3C:71:BF:4C:81:2A"
-#BLE_ADRRESS = "84:CC:A8:5F:90:D6"
+# BLE_ADRRESS = "84:CC:A8:5F:90:D6"
 
+reconnect = False
+reconnect_count = 0
 
 async def notify_debug(client):
     def keypress_debug_handler(sender, data):
         print("\n\nDEBUG Response: {1}\n\n".format(sender, data))
     await client.start_notify(NOTIFY_DEBUG_UUID, keypress_debug_handler)
+    global reconnect, reconnect_count
     while True:
+        if reconnect == True:
+            await client.start_notify(NOTIFY_DEBUG_UUID, keypress_debug_handler)
+            reconnect_count += 1
+            if reconnect_count >= 3:
+                reconnect = False
         await asyncio.sleep(0.1)
 
 
 async def notify_track(client):
     def keypress_track_handler(sender, data):
-        esp_response = "{1}".format(sender, data)
-        print(f'\n\nTRACK Response: {esp_response}\n\n')
-        notify_track_queue.put(esp_response)
+        # esp_response = "{1}".format(sender, data)
+        print(f'\n\nTRACK Response: {data}\n\n')
+        notify_track_queue.put(data)
     await client.start_notify(NOTIFY_TRACK_UUID, keypress_track_handler)
+    global reconnect, reconnect_count
     while True:
+        if reconnect == True:
+            await client.start_notify(NOTIFY_TRACK_UUID, keypress_track_handler)
+            reconnect_count += 1
+            if reconnect_count >= 3:
+                reconnect = False
         await asyncio.sleep(0.1)
 
 
 def poll_track():
     while True:
         esp_response = notify_track_queue.get()
-        esp_response = esp_response.replace("bytearray(b'", "").replace("')", "").split('-')
+        # esp_response = esp_response.replace("bytearray(b'", "").replace("')", "").split('-')
+        esp_response = esp_response.decode('utf-8').split('-')
         track_data = dict()
 
         # duration = 1.5
@@ -81,6 +96,10 @@ def poll_track():
         elif "forward" in esp_response:
             track_data = {"forward": {"current": esp_response[1], "dest": esp_response[-1]}}
             # duration = 1.5
+            if esp_response[-1] == '83':
+                out = json.dumps(record_copy, indent=4)
+                with open('response.json', 'w') as response_file:
+                    print(out, file=response_file)
 
         elif "rotate" in esp_response:
             track_data = {"rotate": {"current": esp_response[1], "face_dir": esp_response[2], "rotate_dir": esp_response[-1]}}
@@ -95,11 +114,18 @@ def poll_track():
 
 async def notify_serve(client):
     def keypress_serve_handler(sender, data):
-        esp_response = "{1}".format(sender, data)
-        print(f'\n\nRobot Response: {esp_response}\n\n')
-        notify_serve_queue.put(esp_response)
+        # esp_response = "{1}".format(sender, data)
+        print(f'\n\nRobot Response: {data}\n\n')
+        if data:
+            notify_serve_queue.put(data)
     await client.start_notify(NOTIFY_SERVE_UUID, keypress_serve_handler)
+    global reconnect, reconnect_count
     while True:
+        if reconnect == True:
+            await client.start_notify(NOTIFY_SERVE_UUID, keypress_serve_handler)
+            reconnect_count += 1
+            if reconnect_count >= 3:
+                reconnect = False
         await asyncio.sleep(0.1)
 
 
@@ -113,6 +139,17 @@ async def forward_request(client):
         await asyncio.sleep(2.0)
 
 
+async def poll_connection(client):
+    global reconnect, reconnect_count
+    while True:
+        if not client.is_connected:
+            await client.connect()
+            reconnect_count = 0
+            reconnect = True
+            
+        await asyncio.sleep(1.0)
+
+
 async def main(address):
     global notify_track_queue, notify_serve_queue, forward_serve_queue
     notify_track_queue = queue.Queue(maxsize=0)
@@ -123,11 +160,11 @@ async def main(address):
 
     async with BleakClient(address) as client:
         await asyncio.gather(
-            # notify_debug(client),
+#            notify_debug(client),
             notify_track(client),
-            # poll_track(),
             notify_serve(client),
-            forward_request(client)
+            forward_request(client),
+            poll_connection(client)
         )
 
 
@@ -140,7 +177,7 @@ def on_connect(client, userdata, flags, rc):
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
-    global coapc
+    # global coapc, record_copy
 
     request = json.loads(msg.payload)
     print("\n\n", msg.topic + " " + str(msg.payload), "\n\n", request)
@@ -152,32 +189,35 @@ def on_message(client, userdata, msg):
     try:
         send_request(request)
     except Exception as e:
+        global coapc, record_copy
         print("\n\nError with BLE: ", str(e), "\n\n", repr(e), "\n\n")
         response = {"Error": "Error with BLE Device"}
         coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
         broadcast_serve({'response': response})
+        record_copy[json.dumps(request)] = response
+        return
+
+    threading.Thread(target=fetch_serve_response, args=(request, )).start()
 
     # Fetch Firebird response
-    if request["method"] == "scan":
-        track_info = request["params"]["plot"]
-    elif request["method"] == "fetchNearest":
-        if "major" in request["params"]["type"]:
-            track_info = "red"
-        else:
-            track_info = "green"
-    else:
-        track_info = None
+    # if request["method"] == "scan":
+    #     track_info = request["params"]["plot"]
+    # elif request["method"] == "fetchNearest":
+    #     if "major" in request["params"]["type"]:
+    #         track_info = "red"
+    #     else:
+    #         track_info = "green"
+    # else:
+    #     track_info = None
 
-    response = fetch_serve_response(request["params"]["id"], request["method"], track_info)
+    # response = fetch_serve_response(request["params"]["id"], request["method"], track_info)
 
-    # response = { 'result': 'ok' }
+    # # Forward Firebird response back to Server
+    # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
+    # # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
 
-    # Forward Firebird response back to Server
-    coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(response))
-    # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
-
-    broadcast_serve({'response': response})
-    record_copy[msg.payload] = response
+    # broadcast_serve({'response': response})
+    # record_copy[msg.payload] = response
 
 
 def send_request(request):
@@ -204,18 +244,33 @@ def send_request(request):
     loop.run_until_complete(forward_serve_queue.put(esp_req_data))
 
 
-def fetch_serve_response(request_id, method_type, track_info):
+def fetch_serve_response(request):
+
+    if request["method"] == "scan":
+        track_info = request["params"]["plot"]
+    elif request["method"] == "fetchNearest":
+        if "major" in request["params"]["type"]:
+            track_info = "red"
+        else:
+            track_info = "green"
+    else:
+        track_info = None
+
+    method_type = request["method"]
+    request_id = request["params"]["id"]
 
     timeTaken = None
 
     robot_response = {"id": request_id}
     esp_response = notify_serve_queue.get()
-    esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
+    # esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
+    esp_response = esp_response.decode('utf-8')
 
     while "accepted" == esp_response:
         broadcast_serve({'accept': method_type})
         esp_response = notify_serve_queue.get()
-        esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
+        # esp_response = esp_response.replace("bytearray(b'", "").replace("')", "")
+        esp_response = esp_response.decode('utf-8')
 
     if "major" in esp_response:
         robot_response["type"] = "majorInjury"
@@ -243,7 +298,15 @@ def fetch_serve_response(request_id, method_type, track_info):
     if timeTaken is not None:
         robot_response["timeTaken"] = timeTaken
 
-    return robot_response
+    # Forward Firebird response back to Server
+    global coapc, record_copy
+    coapc.post(path=f"api/v1/{ACCESS_TOKEN}/telemetry", payload=str(robot_response))
+    # coapc.post(path=f"api/v1/{ACCESS_TOKEN}/rpc/{rpc_id}", payload=str(response))
+
+    broadcast_serve({'response': robot_response})
+    record_copy[json.dumps(request)] = robot_response
+
+    # return robot_response
 
 
 def broadcast_serve(request):
