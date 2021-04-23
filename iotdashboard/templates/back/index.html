@@ -412,13 +412,13 @@
                 var node_num = parseInt(data["debris"]["current"]);
                 var robot_dir = data["debris"]["dir"];
                 if (robot_dir == 'n')
-                    set_debris(nodeName + (node_num - 5), "vertical")
+                    set_debris(nodeName + (node_num - 19), "vertical")
                 else if (robot_dir == 's')
                     set_debris(nodeName + node_num, "vertical")
                 else if (robot_dir == 'e')
                     set_debris(nodeName + node_num, "horizontal")
                 else if (robot_dir == 'w')
-                    set_debris(nodeName + (node_num - 1), "horizontal")
+                    set_debris(nodeName + (node_num - 2), "horizontal")
             }
             else if ("scanned" in data)
             {

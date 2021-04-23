@@ -134,6 +134,8 @@ async def forward_request(client):
         value = await forward_serve_queue.get()
         # value = bytearray(b'scan-7-25')
         value = bytearray(value.encode('utf-8'))
+        # while not client.is_connected:
+        #    await asyncio.sleep(0.1)
         await client.write_gatt_char(WRITE_UUID, value)
         print(f'\n\nForwarded Server Request: {value}\n\n')
         await asyncio.sleep(2.0)
