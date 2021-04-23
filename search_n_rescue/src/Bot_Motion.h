@@ -17,23 +17,34 @@ AIM: APIs for controlling motion of bot
 #define wl_sen_th_l_cal 28//22//18	//Line Does not exists  sen_read < wl_sen_th_l, For calibred value 0-100
 #define ir_sen_th 200
 
-#define Cruise_Vel 200  //PID cruise vel
-#define Cruise_Vel0 175 //Used while turning or moving fwd or back precisely
+#define Cruise_Vel 225  //PID cruise vel
+#define Cruise_Vel0 225 //Used while turning or moving fwd or back precisely
 
 // char str[] = "Hello, I am a Firebird-------- V\n";
-int Get_Curr_Node(void);
-void Set_Curr_Node(int temp); //S=Updates new node for curr node
-char Get_Curr_Head(void);
 
 void Update_Read(void); //Updates reading of WL sensor
+void MinMax(void);
 void calibrate(void);   //Caliberate WL of robot
-void forward_wls1(unsigned char node); //Fn coded by suraj
+void PID();
 void forward_wls(unsigned char node); //Fn coded by akshay Pampatwar
 void left_turn_wls(void);   //Take a left turn till line is detected
 void right_turn_wls(void);  //Take a right turn till line is detected
+bool debris_detection(void);
+void right_90(void);
+void left_90(void);
+char print_color(void);
 
-bool Is_Debris(void); //If debris is detected
+// Updates the injury struct for fetching requests later
+void update_injury(char inj_t, unsigned char row, unsigned char col, unsigned char plot_no);
+void enQueue(struct Queue* q, int k);
+int deQueue(struct Queue* q);
 
-void turn_head(char Head); //Takes desired heading and turn Bot to desired direction 
-void turn_head_to_plot(char Head); // Use this function to turn to plot
+bool check_connected(void);
+void path_planning(unsigned char source_node[2], unsigned char end_node[2]);
+int Get_Dist(void);
+unsigned char Fetch_request(char inj);
+bool Req_coming(void);
+void traverse_line_to_goal(void);
+
+
 #endif /* BOT_MOTION_H_*/

@@ -94,6 +94,7 @@ void Task_1B(void)
  * @brief  Checks for new cmd and if any then executes it depending on conditions
  * Returns: true if cmd is entertained and false if not
  */
+/*
 bool Ent_Cmd(void)
 {
 	int Req_Plot_No=11,Nxt_Node;
@@ -217,7 +218,7 @@ bool Ent_Cmd(void)
 			
 			// rotate_comm(Get_Curr_Node(),Get_Curr_Head(),rot_dir);
 			turn_head( Next_Dir(Get_Curr_Node(), Nxt_Node) );	//Rotate to desired direction
-			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
+			// forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
 			forward_wls(1);	//Move to next node
 			Set_Curr_Node(Nxt_Node);	//Reached to nxt node thus update curr node
 		
@@ -288,10 +289,15 @@ bool Ent_Cmd(void)
 		return true;
 	}
 	return false;
+	
+	
 }
+*/
+
 /**
  * @brief  Scan arena and executes any task if encountered before that
  */
+/*
 bool Task_2B(void)
 {
 	// bool Is_Finished = false;
@@ -319,7 +325,7 @@ bool Task_2B(void)
 			Dest_Node = Min_Dist_Node_Fr_Plot ( Next_Plot_to_Scan(),Get_Curr_Node());
 
 			#ifdef DEBUG_SAND
-				sprintf(str,"Before dikstra, Dest node:%d\n$",Dest_Node);
+				sprintf(str,"Before dikstra, Dest node:%d\n^",Dest_Node);
 				uart_send_string(str);
 			#endif
 
@@ -327,7 +333,7 @@ bool Task_2B(void)
 			In_Path = true;
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Des Plot Nu:%d\n$",Next_Plot_to_Scan());
+			sprintf(str,"Des Plot Nu:%d\n^",Next_Plot_to_Scan());
 			uart_send_string(str);
 			#endif
 		}
@@ -337,7 +343,7 @@ bool Task_2B(void)
 			In_Path = false;
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Plot Scan Complete\n$");
+			sprintf(str,"Plot Scan Complete\n^");
 			uart_send_string(str);
 			#endif
 		}
@@ -351,7 +357,7 @@ bool Task_2B(void)
 		if( Get_Curr_Node() != Dest_Node )	//Goes to next node
 		{
 			#ifdef DEBUG_SAND
-			sprintf(str,"Moving to node:%d\n$",Nxt_Node);
+			sprintf(str,"Moving to node:%d\n^",Nxt_Node);
 			uart_send_string(str);
 			#endif
 			forward_comm(Get_Curr_Node(),Nxt_Node);//Sends current node status to esp32
@@ -389,14 +395,14 @@ bool Task_2B(void)
 		else if( Dest_Node != 66 )// Next_Plot_to_Scan()!= 17)//Plot reached
 		{
 			#ifdef DEBUG_SAND
-			sprintf(str,"Plot nu %d reached\n$",Next_Plot_to_Scan());
+			sprintf(str,"Plot nu %d reached\n^",Next_Plot_to_Scan());
 			uart_send_string(str);
 			#endif
 
 			turn_head_to_plot(Get_Dir_Plot());
 
 			#ifdef DEBUG_SAND
-			sprintf(str,"Rotation finished\n$");
+			sprintf(str,"Rotation finished\n^");
 			uart_send_string(str);
 			#endif
 
@@ -409,7 +415,7 @@ bool Task_2B(void)
 			if(Type_Inj == 'R')
 			{
 				#ifdef DEBUG_SAND
-				sprintf(str,"Plot no: %d with Major Injury\n$",Next_Plot_to_Scan());
+				sprintf(str,"Plot no: %d with Major Injury\n^",Next_Plot_to_Scan());
 				#endif
 				Scan_Res(Next_Plot_to_Scan(),'M');
 				scanned_comm(Next_Plot_to_Scan(),'M');
@@ -457,18 +463,38 @@ bool Task_2B(void)
 	// Is_Finished = true;
 	return false;
 }
+*/
+
+
+void Task_3B(void)
+{
+	traverse_line_to_goal();
+//	forward_wls(1);
+//	left_90();
+//	forward_wls(1);
+//	forward_wls(1);
+//	right_90();
+//	forward_wls(1);
+	
+}	
+
 /**
  * @brief      Executes the logic to achieve the aim of Project
  */
 void Controller(void)
 {
 	// int return_code;
+	
 
 	init_all_peripherals();
 	// while(1)
 	// {
 	// 	forward_comm(0,61);//Sends current node status to esp32
 	// }
+	
+	//char restart[] = "Restart";
+	//lcd_string_EE(restart);
+	
 	calibrate();
 	#ifdef DEBUG_SAND
 		sprintf(str,"Cal Done\n$");
@@ -481,16 +507,27 @@ void Controller(void)
 		sprintf(str,"Command Update\n$");
 		uart_send_string(str);
 	#endif
-	while (Task_2B()==false)
-	{
-		continue;
-	}
-	#ifdef DEBUG_SAND
-		sprintf(str,"Task2B complete\n$");
-		uart_send_string(str);
-	#endif
+
+//	while (Task_2B()==false)
+//	{
+//		continue;
+//	}
+//	#ifdef DEBUG_SAND
+//		sprintf(str,"Task2B complete\n$");
+//		uart_send_string(str);
+//	#endif
 	// Task_1B();		//Complete task related to 1B
 	// int i=1; 
+
+ 
+ 
+ 
+
+       Task_3B();        // Scan the whole area
+       
+       
+       
+       
 	while (1)
 	{
 			/* code */

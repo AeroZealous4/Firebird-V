@@ -42,6 +42,7 @@ unsigned int Time_Completed(void); //Returns time in secs after reception of val
 void Task_Complete(void);   //Sends msg to ESP32 about conveying completion of last task 
 
 /*Tracking Information*/
+
 //Send a scanned info to esp32 which will be displayed on GUI
 //inj: 'M','m', No injury not need to be reported
 void scanned_comm(int plot_num, char inj);
