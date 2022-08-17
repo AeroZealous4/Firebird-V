@@ -1,4 +1,4 @@
-Course Project for CS 684 - Search and Rescue Robot
+# Course Project for CS 684 - Search and Rescue Robot
 
 # Firebird-V
 Disaster management using firebird V robot 
